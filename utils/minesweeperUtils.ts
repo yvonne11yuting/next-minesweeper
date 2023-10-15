@@ -1,3 +1,12 @@
+export const generateBoard = (rows: number, cols: number): string[] => {
+    let board: string[] = [];
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++)
+            board.push(`${r}-${c}`);
+    }
+    return board;
+};
+
 export const initMines = ({
     rows,
     cols,

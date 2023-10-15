@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Bomb } from "lucide-react";
-import { initMines, getAdjacentSquares } from "@/utils/minesweeperUtils";
+import { initMines, getAdjacentSquares, generateBoard } from "@/utils/minesweeperUtils";
 
 interface BoardProps {
     rows: number;
@@ -23,6 +23,7 @@ const Board = ({
     const [mines, setMines] = useState<string[]>([]);
     const [squareStatus, setSquareStatus] = useState<SquareStatus>({});
     const [gameStatus, setGameStatus] = useState(0); // 0: playing, 1: win, -1: lose
+    const board = generateBoard(rows, cols);
 
     const clickSquare = (e: React.MouseEvent<HTMLDivElement>) => {
         let tempStatus: SquareStatus = {};
@@ -78,31 +79,28 @@ const Board = ({
             gridTemplateColumns: `repeat(${cols}, 1fr)`
         }} onClick={clickSquare}>
             {
-                Array(rows).fill(0).map((_, rowIdx) => (
-                    Array(cols).fill(0).map((_, colIdx) => {
-                        const key = `${rowIdx}-${colIdx}`;
-                        const text = Number(squareStatus[key]) > 0 ? squareStatus[key] : '';
-                        const bgColor = squareStatus[key] && squareStatus[key] !== 'flagged' ? 'bg-lime-500' : 'bg-lime-300'
-                        return (
-                            <div
-                                data-square={key}
-                                key={key}
-                                className={`flex justify-center items-center border border-lime-200 ${bgColor}`}
-                            >
-                                {
-                                    gameStatus === -1 && mines.includes(key) && (
-                                        <Bomb color="#020617" />
-                                    )
-                                }
-                                {
-                                    text && (
-                                        <span className="text-2xl">{text}</span>
-                                    )
-                                }
-                            </div>
-                        )
-                    })
-                ))
+                board.map((squareId) => {
+                    const text = Number(squareStatus[squareId]) > 0 ? squareStatus[squareId] : '';
+                    const bgColor = squareStatus[squareId] && squareStatus[squareId] !== 'flagged' ? 'bg-lime-500' : 'bg-lime-300'
+                    return (
+                        <div
+                            data-square={squareId}
+                            key={squareId}
+                            className={`flex justify-center items-center border border-lime-200 ${bgColor}`}
+                        >
+                            {
+                                gameStatus === -1 && mines.includes(squareId) && (
+                                    <Bomb color="#020617" />
+                                )
+                            }
+                            {
+                                text && (
+                                    <span className="text-2xl">{text}</span>
+                                )
+                            }
+                        </div>
+                    )
+                })
             }
         </div>
     )
