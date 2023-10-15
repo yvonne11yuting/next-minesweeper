@@ -1,5 +1,7 @@
 "use client";
 import { useState } from "react";
+import { Bomb } from "lucide-react";
+import { initMines, getAdjacentSquares } from "@/utils/minesweeperUtils";
 
 interface BoardProps {
     rows: number;
@@ -7,35 +9,70 @@ interface BoardProps {
     totalMines: number;
 }
 
+interface SquareStatus {
+    [key: string]: string; // key: row-col, value: status
+}
+
+const SQUARE_ID = 'data-square';
+
 const Board = ({
     rows,
     cols,
     totalMines,
 }: BoardProps) => {
     const [mines, setMines] = useState<string[]>([]);
+    const [squareStatus, setSquareStatus] = useState<SquareStatus>({});
+    const [gameStatus, setGameStatus] = useState(0); // 0: playing, 1: win, -1: lose
+
     const clickSquare = (e: React.MouseEvent<HTMLDivElement>) => {
-        const squareId = (e.target as Element).closest('[data-square]')?.getAttribute('data-square') || '';
+        let status: SquareStatus = {};
+        const squareId = (e.target as Element).closest(`[${SQUARE_ID}]`)?.getAttribute(SQUARE_ID) || '';
         if (!squareId) return;
 
         console.log(squareId);
         console.log(mines);
 
         if (mines.length === 0) {
-            initMines(squareId);
+            const newMines = initMines({
+                rows,
+                cols,
+                firstPosition: squareId,
+                totalMines
+            });
+            checkMines(squareId, newMines, { ...squareStatus, ...status });
+            setMines(newMines);
+        } else {
+            const isEndGame = checkGameStatus(squareId);
+            if (!isEndGame) {
+                checkMines(squareId, mines, { ...squareStatus, ...status });
+            }
+        }
+        setSquareStatus({ ...squareStatus, ...status });
+
+        function checkMines(squareId: string, baseMines: string[], curStatus: SquareStatus) {
+            const [row, col] = squareId.split('-').map(Number);
+            if (row < 0 || row >= rows || col < 0 || col >= cols) return;
+            if (curStatus[squareId]) return;
+
+            const adjacentSquares = getAdjacentSquares(row, col);
+            const minesAround = adjacentSquares.filter(key => baseMines.includes(key));
+            status = { ...status, [squareId]: minesAround.length.toString() };
+
+            if (minesAround.length > 0) return;
+
+            adjacentSquares.forEach(key => {
+                checkMines(key, baseMines, { ...curStatus, ...status });
+            })
         }
     }
 
-    const initMines = (firstPosition: string) => {
-        const newMines: string[] = [];
-        while (newMines.length < totalMines) {
-            const row = Math.floor(Math.random() * rows);
-            const col = Math.floor(Math.random() * cols);
-            const key = `${row}-${col}`;
-            if (!newMines.includes(key) && key !== firstPosition) {
-                newMines.push(key);
-            }
+    const checkGameStatus = (squareId: string) => {
+        if (mines.includes(squareId)) {
+            setGameStatus(-1)
+            return true;
         }
-        setMines(newMines);
+        // TODO: Need to check success case
+        return false;
     }
 
     return (
@@ -47,8 +84,25 @@ const Board = ({
                 Array(rows).fill(0).map((_, rowIdx) => (
                     Array(cols).fill(0).map((_, colIdx) => {
                         const key = `${rowIdx}-${colIdx}`;
+                        const text = Number(squareStatus[key]) > 0 ? squareStatus[key] : '';
+                        const bgColor = squareStatus[key] && squareStatus[key] !== 'flagged' ? 'bg-lime-500' : 'bg-lime-300'
                         return (
-                            <div data-square={key} key={key} className="bg-lime-300 border border-lime-200" />
+                            <div
+                                data-square={key}
+                                key={key}
+                                className={`flex justify-center items-center border border-lime-200 ${bgColor}`}
+                            >
+                                {
+                                    gameStatus === -1 && mines.includes(key) && (
+                                        <Bomb color="#020617" />
+                                    )
+                                }
+                                {
+                                    text && (
+                                        <span className="text-2xl">{text}</span>
+                                    )
+                                }
+                            </div>
                         )
                     })
                 ))

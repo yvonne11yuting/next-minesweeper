@@ -2,8 +2,8 @@ import { Flag } from 'lucide-react';
 import Board from './Board';
 
 const Minesweeper = ({
-    rows = 10,
-    cols = 10,
+    rows = 9,
+    cols = 9,
     totalMines = 10,
 }) => {
     return (
