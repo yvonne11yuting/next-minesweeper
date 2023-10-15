@@ -42,25 +42,3 @@ export const getAdjacentSquares = (row: number, col: number): string[] => {
         `${row + 1}-${col + 1}`,
     ].filter(key => /^\d+-\d+$/.test(key));
 }
-
-// export function checkMines(
-//     squareId: string,
-//     baseMines: string[],
-//     curStatus: { [key: string]: string }
-// ) {
-//     const [row, col] = squareId.split('-').map(Number);
-//     if (row < 0 || row >= 10 || col < 0 || col >= 10) return;
-//     if (curStatus[squareId]) return;
-
-//     const adjacentSquares = getAdjacentSquares(row, col);
-//     const minesAround = adjacentSquares.filter(key => baseMines.includes(key));
-//     const status = { ...curStatus, [squareId]: minesAround.length.toString() };
-
-//     if (minesAround.length > 0) {
-//         return status;
-//     };
-
-//     adjacentSquares.forEach(key => {
-//         checkMines(key, baseMines, status);
-//     })
-// }
