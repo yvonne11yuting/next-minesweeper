@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Bomb } from "lucide-react";
 import { initMines, getAdjacentSquares, generateBoard } from "@/utils/minesweeperUtils";
 
@@ -25,12 +25,24 @@ const Board = ({
     const [gameStatus, setGameStatus] = useState(0); // 0: playing, 1: win, -1: lose
     const board = generateBoard(rows, cols);
 
+    useEffect(() => {
+        if (gameStatus === 0) {
+            checkGameWin(squareStatus, rows * cols, totalMines);
+        }
+    }, [gameStatus, squareStatus, rows, cols, totalMines]);
+
     const clickSquare = (e: React.MouseEvent<HTMLDivElement>) => {
         let tempStatus: SquareStatus = {};
         const squareId = (e.target as Element).closest(`[${SQUARE_ID}]`)?.getAttribute(SQUARE_ID) || '';
-        if (!squareId) return;
+        const minesAreSet = mines.length > 0;
+        if (!squareId || gameStatus !== 0) return;
 
-        if (!mines.length) {
+        if (minesAreSet) {
+            const isMine = checkGameOver(squareId, mines);
+            if (!isMine) {
+                checkMines(squareId, mines, squareStatus);
+            }
+        } else {
             const newMines = initMines({
                 rows,
                 cols,
@@ -39,12 +51,8 @@ const Board = ({
             });
             checkMines(squareId, newMines, {});
             setMines(newMines);
-        } else {
-            const isEndGame = checkGameStatus(squareId);
-            if (!isEndGame) {
-                checkMines(squareId, mines, squareStatus);
-            }
         }
+        // checkGameStatus(squareId);
         setSquareStatus({ ...squareStatus, ...tempStatus });
 
         function checkMines(squareId: string, baseMines: string[], curStatus: SquareStatus) {
@@ -64,13 +72,29 @@ const Board = ({
         }
     }
 
-    const checkGameStatus = (squareId: string) => {
+    const checkGameOver = (squareId: string, mines: string[]) => {
         if (mines.includes(squareId)) {
             setGameStatus(-1)
+            console.log('game over')
             return true;
         }
-        // TODO: Need to check success case
         return false;
+    }
+
+    const checkGameWin = (squareStatus: SquareStatus, totalSquares: number, totalMines: number) => {
+        const totalOpened = Object.keys(squareStatus).length;
+        if (totalOpened + totalMines === totalSquares) {
+            setGameStatus(1);
+            console.log('win')
+            return true;
+        }
+        return false;
+    }
+
+    const resetGame = () => {
+        setMines([]);
+        setSquareStatus({});
+        setGameStatus(0);
     }
 
     return (
