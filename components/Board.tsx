@@ -10,7 +10,7 @@ interface BoardProps {
 }
 
 interface SquareStatus {
-    [key: string]: string; // key: row-col, value: status
+    [key: string]: string; // key: row-col, value: tempStatus
 }
 
 const SQUARE_ID = 'data-square';
@@ -25,29 +25,26 @@ const Board = ({
     const [gameStatus, setGameStatus] = useState(0); // 0: playing, 1: win, -1: lose
 
     const clickSquare = (e: React.MouseEvent<HTMLDivElement>) => {
-        let status: SquareStatus = {};
+        let tempStatus: SquareStatus = {};
         const squareId = (e.target as Element).closest(`[${SQUARE_ID}]`)?.getAttribute(SQUARE_ID) || '';
         if (!squareId) return;
 
-        console.log(squareId);
-        console.log(mines);
-
-        if (mines.length === 0) {
+        if (!mines.length) {
             const newMines = initMines({
                 rows,
                 cols,
                 firstPosition: squareId,
                 totalMines
             });
-            checkMines(squareId, newMines, { ...squareStatus, ...status });
+            checkMines(squareId, newMines, {});
             setMines(newMines);
         } else {
             const isEndGame = checkGameStatus(squareId);
             if (!isEndGame) {
-                checkMines(squareId, mines, { ...squareStatus, ...status });
+                checkMines(squareId, mines, squareStatus);
             }
         }
-        setSquareStatus({ ...squareStatus, ...status });
+        setSquareStatus({ ...squareStatus, ...tempStatus });
 
         function checkMines(squareId: string, baseMines: string[], curStatus: SquareStatus) {
             const [row, col] = squareId.split('-').map(Number);
@@ -56,12 +53,12 @@ const Board = ({
 
             const adjacentSquares = getAdjacentSquares(row, col);
             const minesAround = adjacentSquares.filter(key => baseMines.includes(key));
-            status = { ...status, [squareId]: minesAround.length.toString() };
+            tempStatus = { ...tempStatus, [squareId]: minesAround.length.toString() };
 
             if (minesAround.length > 0) return;
 
             adjacentSquares.forEach(key => {
-                checkMines(key, baseMines, { ...curStatus, ...status });
+                checkMines(key, baseMines, tempStatus);
             })
         }
     }
