@@ -1,16 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Bomb } from "lucide-react";
-import { initMines, getAdjacentSquares, generateBoard } from "@/utils/minesweeperUtils";
+import { initMines, getAdjacentSquares, generateBoard, checkGameOver, checkGameWin, SquareStatus } from "@/utils/minesweeperUtils";
 
 interface BoardProps {
     rows: number;
     cols: number;
     totalMines: number;
-}
-
-interface SquareStatus {
-    [key: string]: string; // key: row-col, value: tempStatus
 }
 
 const SQUARE_ID = 'data-square';
@@ -22,12 +18,15 @@ const Board = ({
 }: BoardProps) => {
     const [mines, setMines] = useState<string[]>([]);
     const [squareStatus, setSquareStatus] = useState<SquareStatus>({});
-    const [gameStatus, setGameStatus] = useState(0); // 0: playing, 1: win, -1: lose
+    const [gameStatus, setGameStatus] = useState<number>(0); // 0: playing, 1: win, -1: lose
     const board = generateBoard(rows, cols);
 
     useEffect(() => {
         if (gameStatus === 0) {
-            checkGameWin(squareStatus, rows * cols, totalMines);
+            const gameWin = checkGameWin(squareStatus, rows * cols, totalMines);
+            if (gameWin) {
+                setGameStatus(1);
+            }
         }
     }, [gameStatus, squareStatus, rows, cols, totalMines]);
 
@@ -39,7 +38,9 @@ const Board = ({
 
         if (minesAreSet) {
             const isMine = checkGameOver(squareId, mines);
-            if (!isMine) {
+            if (isMine) {
+                setGameStatus(-1)
+            } else {
                 checkMines(squareId, mines, squareStatus);
             }
         } else {
@@ -52,7 +53,6 @@ const Board = ({
             checkMines(squareId, newMines, {});
             setMines(newMines);
         }
-        // checkGameStatus(squareId);
         setSquareStatus({ ...squareStatus, ...tempStatus });
 
         function checkMines(squareId: string, baseMines: string[], curStatus: SquareStatus) {
@@ -66,29 +66,10 @@ const Board = ({
 
             if (minesAround.length > 0) return;
 
-            adjacentSquares.forEach(key => {
-                checkMines(key, baseMines, tempStatus);
-            })
+            for (let targetSquare of adjacentSquares) {
+                checkMines(targetSquare, baseMines, tempStatus);
+            }
         }
-    }
-
-    const checkGameOver = (squareId: string, mines: string[]) => {
-        if (mines.includes(squareId)) {
-            setGameStatus(-1)
-            console.log('game over')
-            return true;
-        }
-        return false;
-    }
-
-    const checkGameWin = (squareStatus: SquareStatus, totalSquares: number, totalMines: number) => {
-        const totalOpened = Object.keys(squareStatus).length;
-        if (totalOpened + totalMines === totalSquares) {
-            setGameStatus(1);
-            console.log('win')
-            return true;
-        }
-        return false;
     }
 
     const resetGame = () => {
@@ -105,7 +86,7 @@ const Board = ({
             {
                 board.map((squareId) => {
                     const text = Number(squareStatus[squareId]) > 0 ? squareStatus[squareId] : '';
-                    const bgColor = squareStatus[squareId] && squareStatus[squareId] !== 'flagged' ? 'bg-lime-500' : 'bg-lime-300'
+                    const bgColor = squareStatus[squareId] ? 'bg-lime-500' : 'bg-lime-300'
                     return (
                         <div
                             data-square={squareId}
