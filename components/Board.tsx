@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Bomb, Flag } from "lucide-react";
-import { initMines, getAdjacentSquares, generateBoard, checkGameOver, checkGameWin, SquareStatus } from "@/utils/minesweeperUtils";
+import { getAdjacentSquares, checkGameOver, checkGameWin, SquareStatus, MineSweeper } from "@/utils/minesweeperUtils";
 
 enum GameStatus {
     playing = 0,
@@ -30,7 +30,8 @@ const Board = ({
     const [flagged, setFlagged] = useState<string[]>([]);
     const [squareStatus, setSquareStatus] = useState<SquareStatus>({});
     const [gameStatus, setGameStatus] = useState<GameStatus>(0);
-    const board = generateBoard(rows, cols);
+    const mineSweeper = new MineSweeper(rows, cols, mines, squareStatus)
+    const board = mineSweeper.generateBoard;
 
     useEffect(() => {
         if (gameStatus === 0) {
@@ -42,8 +43,6 @@ const Board = ({
     }, [gameStatus, squareStatus, rows, cols, totalMines]);
 
     const clickSquare = (e: React.MouseEvent<HTMLDivElement>) => {
-        let tempStatus: SquareStatus = {};
-        console.log('detail', e.detail)
         const squareId = (e.target as Element).closest(`[${SQUARE_ID}]`)?.getAttribute(SQUARE_ID) || '';
         const minesAreSet = mines.length > 0;
         const isFlagged = flagged.includes(squareId);
@@ -57,7 +56,7 @@ const Board = ({
                 const isClick = e.detail === 1;
                 const isDoubleClick = e.detail === 2;
                 if (isClick) {
-                    checkMines(squareId, mines, squareStatus);
+                    mineSweeper.checkSquare(squareId);
                 }
                 if (isDoubleClick && squareStatus[squareId] && squareStatus[squareId] !== '0') {
                     const [row, col] = squareId.split('-').map(Number);
@@ -66,38 +65,17 @@ const Board = ({
                     if (adjacentFlags.length === Number(squareStatus[squareId])) {
                         for (let targetSquare of adjacentSquares) {
                             if (flagged.includes(targetSquare)) continue;
-                            checkMines(targetSquare, mines, squareStatus);
+                            mineSweeper.checkSquare(targetSquare);
                         }
                     }
                 }
             }
         } else {
-            const newMines = initMines({
-                rows,
-                cols,
-                firstPosition: squareId,
-                totalMines
-            });
-            checkMines(squareId, newMines, {});
-            setMines(newMines);
+            mineSweeper.initMines(squareId, totalMines);
+            mineSweeper.checkSquare(squareId);
+            setMines(mineSweeper.mines);
         }
-        setSquareStatus({ ...squareStatus, ...tempStatus });
-
-        function checkMines(squareId: string, baseMines: string[], curStatus: SquareStatus) {
-            const [row, col] = squareId.split('-').map(Number);
-            if (row < 0 || row >= rows || col < 0 || col >= cols) return;
-            if (curStatus[squareId]) return;
-
-            const adjacentSquares = getAdjacentSquares(row, col);
-            const minesAround = adjacentSquares.filter(key => baseMines.includes(key));
-            tempStatus = { ...tempStatus, [squareId]: minesAround.length.toString() };
-
-            if (minesAround.length > 0) return;
-
-            for (let targetSquare of adjacentSquares) {
-                checkMines(targetSquare, baseMines, tempStatus);
-            }
-        }
+        setSquareStatus({ ...squareStatus, ...mineSweeper.squareStatus });
     }
 
     const flagSquare = (e: React.MouseEvent<HTMLDivElement>) => {

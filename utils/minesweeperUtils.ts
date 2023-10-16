@@ -2,38 +2,6 @@ export interface SquareStatus {
     [key: string]: string; // '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8'
 }
 
-export const generateBoard = (rows: number, cols: number): string[] => {
-    let board: string[] = [];
-    for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++)
-            board.push(`${r}-${c}`);
-    }
-    return board;
-};
-
-export const initMines = ({
-    rows,
-    cols,
-    firstPosition,
-    totalMines
-}: {
-    rows: number;
-    cols: number;
-    firstPosition: string;
-    totalMines: number;
-}) => {
-    const newMines: string[] = [];
-    while (newMines.length < totalMines) {
-        const row = Math.floor(Math.random() * rows);
-        const col = Math.floor(Math.random() * cols);
-        const key = `${row}-${col}`;
-        if (!newMines.includes(key) && key !== firstPosition) {
-            newMines.push(key);
-        }
-    }
-    return newMines;
-}
-
 export const getAdjacentSquares = (row: number, col: number): string[] => {
     return [
         `${row - 1}-${col - 1}`,
@@ -62,4 +30,56 @@ export const checkGameWin = (squareStatus: SquareStatus, totalSquares: number, t
         return true;
     }
     return false;
+}
+
+export class MineSweeper {
+    rows: number;
+    cols: number;
+    mines: string[];
+    squareStatus: { [key: string]: string; };
+
+    constructor(rows: number, cols: number, mines: string[], squareStatus: { [key: string]: string; }) {
+        this.rows = rows;
+        this.cols = cols;
+        this.mines = mines;
+        this.squareStatus = squareStatus;
+    }
+
+    get generateBoard(): string[] {
+        let board: string[] = [];
+        for (let r = 0; r < this.rows; r++) {
+            for (let c = 0; c < this.cols; c++)
+                board.push(`${r}-${c}`);
+        }
+        return board;
+    };
+
+    initMines(firstPosition: string, totalMines: number) {
+        const newMines: string[] = [];
+        while (newMines.length < totalMines) {
+            const row = Math.floor(Math.random() * this.rows);
+            const col = Math.floor(Math.random() * this.cols);
+            const key = `${row}-${col}`;
+            if (!newMines.includes(key) && key !== firstPosition) {
+                newMines.push(key);
+            }
+        }
+        this.mines = newMines;
+    }
+
+    checkSquare(squareId: string) {
+        const [row, col] = squareId.split('-').map(Number);
+        if (row < 0 || row >= this.rows || col < 0 || col >= this.cols) return;
+        if (this.squareStatus[squareId]) return;
+
+        const adjacentSquares = getAdjacentSquares(row, col);
+        const minesAround = adjacentSquares.filter(key => this.mines.includes(key));
+        this.squareStatus = { ...this.squareStatus, [squareId]: minesAround.length.toString() };
+
+        if (minesAround.length > 0) return;
+
+        for (let targetSquare of adjacentSquares) {
+            this.checkSquare(targetSquare);
+        }
+    }
 }
