@@ -1,3 +1,7 @@
+export interface SquareStatus {
+    [key: string]: string; // '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8'
+}
+
 export const generateBoard = (rows: number, cols: number): string[] => {
     let board: string[] = [];
     for (let r = 0; r < rows; r++) {
@@ -41,4 +45,21 @@ export const getAdjacentSquares = (row: number, col: number): string[] => {
         `${row + 1}-${col}`,
         `${row + 1}-${col + 1}`,
     ].filter(key => /^\d+-\d+$/.test(key));
+}
+
+export const checkGameOver = (squareId: string, mines: string[]) => {
+    if (mines.includes(squareId)) {
+        console.log('game over')
+        return true;
+    }
+    return false;
+}
+
+export const checkGameWin = (squareStatus: SquareStatus, totalSquares: number, totalMines: number) => {
+    const totalOpened = Object.keys(squareStatus).length;
+    if (totalOpened + totalMines === totalSquares) {
+        console.log('win')
+        return true;
+    }
+    return false;
 }
