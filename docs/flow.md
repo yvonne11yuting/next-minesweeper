@@ -37,14 +37,14 @@ Accessibility features include flagging and chording. Users can flag unclicked s
 ### Flagging
 ```mermaid
 flowchart LR
-    event(Right click a square) --> checkState{Is not clicked}
+    event[Right click a square] --> checkState{Is not clicked}
     checkState --> |Yes| tagSquare[Tag the square as unclickable] --> endRound[End this round]
 ```
 
 ### Chording
 ```mermaid
 flowchart LR
-    event(Double click a clicked square with number) --> checkFlags{If `the number on the square` matches \n `the number of flags on adjacent squares`}
+    event[Double click a clicked square with number] --> checkFlags{If `the number on the square` matches \n `the number of flags on adjacent squares`}
     checkFlags --> |Yes| checkSquare[Check all remaining squares around the number \n ref: Check_A_Square]
     checkSquare --> endRound[End this round]
 ```
