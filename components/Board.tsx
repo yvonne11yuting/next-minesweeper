@@ -43,6 +43,7 @@ const Board = ({
 
     const clickSquare = (e: React.MouseEvent<HTMLDivElement>) => {
         let tempStatus: SquareStatus = {};
+        console.log('detail', e.detail)
         const squareId = (e.target as Element).closest(`[${SQUARE_ID}]`)?.getAttribute(SQUARE_ID) || '';
         const minesAreSet = mines.length > 0;
         const isFlagged = flagged.includes(squareId);
@@ -53,7 +54,22 @@ const Board = ({
             if (isMine) {
                 setGameStatus(-1)
             } else {
-                checkMines(squareId, mines, squareStatus);
+                const isClick = e.detail === 1;
+                const isDoubleClick = e.detail === 2;
+                if (isClick) {
+                    checkMines(squareId, mines, squareStatus);
+                }
+                if (isDoubleClick && squareStatus[squareId] && squareStatus[squareId] !== '0') {
+                    const [row, col] = squareId.split('-').map(Number);
+                    const adjacentSquares = getAdjacentSquares(row, col);
+                    const adjacentFlags = adjacentSquares.filter(key => flagged.includes(key));
+                    if (adjacentFlags.length === Number(squareStatus[squareId])) {
+                        for (let targetSquare of adjacentSquares) {
+                            if (flagged.includes(targetSquare)) continue;
+                            checkMines(targetSquare, mines, squareStatus);
+                        }
+                    }
+                }
             }
         } else {
             const newMines = initMines({
