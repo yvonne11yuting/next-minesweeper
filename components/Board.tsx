@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Bomb } from "lucide-react";
+import { Bomb, Flag } from "lucide-react";
 import { initMines, getAdjacentSquares, generateBoard, checkGameOver, checkGameWin, SquareStatus } from "@/utils/minesweeperUtils";
 
 enum GameStatus {
@@ -13,6 +13,8 @@ interface BoardProps {
     rows: number;
     cols: number;
     totalMines: number;
+    flags: number
+    setFlags: (flags: number) => void;
 }
 
 const SQUARE_ID = 'data-square';
@@ -21,8 +23,11 @@ const Board = ({
     rows,
     cols,
     totalMines,
+    flags,
+    setFlags
 }: BoardProps) => {
     const [mines, setMines] = useState<string[]>([]);
+    const [flagged, setFlagged] = useState<string[]>([]);
     const [squareStatus, setSquareStatus] = useState<SquareStatus>({});
     const [gameStatus, setGameStatus] = useState<GameStatus>(0);
     const board = generateBoard(rows, cols);
@@ -40,7 +45,8 @@ const Board = ({
         let tempStatus: SquareStatus = {};
         const squareId = (e.target as Element).closest(`[${SQUARE_ID}]`)?.getAttribute(SQUARE_ID) || '';
         const minesAreSet = mines.length > 0;
-        if (!squareId || gameStatus !== 0) return;
+        const isFlagged = flagged.includes(squareId);
+        if (!squareId || gameStatus !== 0 || isFlagged) return;
 
         if (minesAreSet) {
             const isMine = checkGameOver(squareId, mines);
@@ -78,6 +84,18 @@ const Board = ({
         }
     }
 
+    const flagSquare = (e: React.MouseEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        const squareId = (e.target as Element).closest(`[${SQUARE_ID}]`)?.getAttribute(SQUARE_ID) || '';
+        if (flagged.includes(squareId)) {
+            setFlagged(flagged.filter(id => id !== squareId));
+            setFlags(flags + 1);
+        } else {
+            setFlagged([...flagged, squareId]);
+            setFlags(flags - 1);
+        }
+    }
+
     const resetGame = () => {
         setMines([]);
         setSquareStatus({});
@@ -88,11 +106,13 @@ const Board = ({
         <div className="grid w-80 sm:w-[500px] h-80 sm:h-[500px]" style={{
             gridTemplateRows: `repeat(${rows}, 1fr)`,
             gridTemplateColumns: `repeat(${cols}, 1fr)`
-        }} onClick={clickSquare}>
+        }} onClick={clickSquare} onContextMenu={flagSquare}>
             {
                 board.map((squareId) => {
                     const text = Number(squareStatus[squareId]) > 0 ? squareStatus[squareId] : '';
-                    const bgColor = squareStatus[squareId] ? 'bg-lime-500' : 'bg-lime-300'
+                    const isMine = mines.includes(squareId);
+                    const hasFlag = flagged.includes(squareId);
+                    const bgColor = squareStatus[squareId] && !hasFlag ? 'bg-lime-500' : 'bg-lime-300'
                     return (
                         <div
                             data-square={squareId}
@@ -100,13 +120,18 @@ const Board = ({
                             className={`flex justify-center items-center border border-lime-200 ${bgColor}`}
                         >
                             {
-                                gameStatus === -1 && mines.includes(squareId) && (
+                                gameStatus === -1 && isMine && !hasFlag && (
                                     <Bomb color="#020617" />
                                 )
                             }
                             {
                                 text && (
                                     <span className="text-2xl">{text}</span>
+                                )
+                            }
+                            {
+                                hasFlag && (
+                                    <Flag color="#dc2626" />
                                 )
                             }
                         </div>
