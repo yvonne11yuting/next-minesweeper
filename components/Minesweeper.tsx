@@ -13,7 +13,6 @@ const Minesweeper = ({
         <div>
             <div>
                 <span className="inline-flex gap-2">
-                    {/* TODO: Need to change to flag remaining number */}
                     <Flag color="#dc2626" />{flags}
                 </span>
             </div>

@@ -75,7 +75,6 @@ export class MineSweeper {
         this.squareStatus = { ...this.squareStatus, [squareId]: minesAround.length.toString() };
         if (minesAround.length > 0) return;
 
-
         for (let targetSquare of adjacentSquares) {
             this.checkSquare(targetSquare);
         }

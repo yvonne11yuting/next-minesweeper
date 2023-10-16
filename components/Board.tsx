@@ -100,6 +100,7 @@ const Board = ({
                     const isMine = mines.includes(squareId);
                     const hasFlag = flagged.includes(squareId);
                     const bgColor = squareStatus[squareId] && !hasFlag ? 'bg-lime-500' : 'bg-lime-300'
+                    const wrongFlagStyles = '-rotate-90 transition ease-out duration-1000';
                     return (
                         <div
                             data-square={squareId}
@@ -112,13 +113,13 @@ const Board = ({
                                 )
                             }
                             {
-                                text && (
+                                text && !hasFlag && (
                                     <span className="text-2xl">{text}</span>
                                 )
                             }
                             {
                                 hasFlag && (
-                                    <Flag color="#dc2626" />
+                                    <Flag className={`${text ? wrongFlagStyles : ''}`} color="#dc2626" />
                                 )
                             }
                         </div>
