@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Bomb, Flag } from "lucide-react";
-import { getAdjacentSquares, checkGameOver, checkGameWin, SquareStatus, MineSweeper } from "@/utils/minesweeperUtils";
+import { checkGameWin, SquareStatus, MineSweeper } from "@/utils/minesweeperUtils";
 
 enum GameStatus {
     playing = 0,
@@ -44,31 +44,23 @@ const Board = ({
 
     const clickSquare = (e: React.MouseEvent<HTMLDivElement>) => {
         const squareId = (e.target as Element).closest(`[${SQUARE_ID}]`)?.getAttribute(SQUARE_ID) || '';
+        const isClick = e.detail === 1;
+        const isDoubleClick = e.detail === 2;
+
         const minesAreSet = mines.length > 0;
         const isFlagged = flagged.includes(squareId);
         if (!squareId || gameStatus !== 0 || isFlagged) return;
 
         if (minesAreSet) {
-            const isMine = checkGameOver(squareId, mines);
-            if (isMine) {
+            if (isDoubleClick && squareStatus[squareId] && squareStatus[squareId] !== '0') {
+                mineSweeper.checkAdjacentSquares(squareId, flagged);
+            }
+            if (isClick) {
+                mineSweeper.checkSquare(squareId);
+            }
+
+            if (mineSweeper.gameStatus === 'lose') {
                 setGameStatus(-1)
-            } else {
-                const isClick = e.detail === 1;
-                const isDoubleClick = e.detail === 2;
-                if (isClick) {
-                    mineSweeper.checkSquare(squareId);
-                }
-                if (isDoubleClick && squareStatus[squareId] && squareStatus[squareId] !== '0') {
-                    const [row, col] = squareId.split('-').map(Number);
-                    const adjacentSquares = getAdjacentSquares(row, col);
-                    const adjacentFlags = adjacentSquares.filter(key => flagged.includes(key));
-                    if (adjacentFlags.length === Number(squareStatus[squareId])) {
-                        for (let targetSquare of adjacentSquares) {
-                            if (flagged.includes(targetSquare)) continue;
-                            mineSweeper.checkSquare(targetSquare);
-                        }
-                    }
-                }
             }
         } else {
             mineSweeper.initMines(squareId, totalMines);

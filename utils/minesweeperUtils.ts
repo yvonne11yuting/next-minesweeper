@@ -2,27 +2,6 @@ export interface SquareStatus {
     [key: string]: string; // '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8'
 }
 
-export const getAdjacentSquares = (row: number, col: number): string[] => {
-    return [
-        `${row - 1}-${col - 1}`,
-        `${row - 1}-${col}`,
-        `${row - 1}-${col + 1}`,
-        `${row}-${col - 1}`,
-        `${row}-${col + 1}`,
-        `${row + 1}-${col - 1}`,
-        `${row + 1}-${col}`,
-        `${row + 1}-${col + 1}`,
-    ].filter(key => /^\d+-\d+$/.test(key));
-}
-
-export const checkGameOver = (squareId: string, mines: string[]) => {
-    if (mines.includes(squareId)) {
-        console.log('game over')
-        return true;
-    }
-    return false;
-}
-
 export const checkGameWin = (squareStatus: SquareStatus, totalSquares: number, totalMines: number) => {
     const totalOpened = Object.keys(squareStatus).length;
     if (totalOpened + totalMines === totalSquares) {
@@ -35,8 +14,9 @@ export const checkGameWin = (squareStatus: SquareStatus, totalSquares: number, t
 export class MineSweeper {
     rows: number;
     cols: number;
-    mines: string[];
     squareStatus: { [key: string]: string; };
+    mines: string[];
+    gameStatus: 'playing' | 'win' | 'lose' = 'playing';
 
     constructor(rows: number, cols: number, mines: string[], squareStatus: { [key: string]: string; }) {
         this.rows = rows;
@@ -54,6 +34,19 @@ export class MineSweeper {
         return board;
     };
 
+    private getAdjacentSquares(row: number, col: number): string[] {
+        return [
+            `${row - 1}-${col - 1}`, // left top
+            `${row - 1}-${col}`,     // top
+            `${row - 1}-${col + 1}`, // right top
+            `${row}-${col - 1}`,     // left
+            `${row}-${col + 1}`,     // right
+            `${row + 1}-${col - 1}`, // left bottom
+            `${row + 1}-${col}`,     // bottom
+            `${row + 1}-${col + 1}`, // right bottom
+        ].filter(key => /^\d+-\d+$/.test(key));
+    }
+
     initMines(firstPosition: string, totalMines: number) {
         const newMines: string[] = [];
         while (newMines.length < totalMines) {
@@ -68,18 +61,40 @@ export class MineSweeper {
     }
 
     checkSquare(squareId: string) {
-        const [row, col] = squareId.split('-').map(Number);
-        if (row < 0 || row >= this.rows || col < 0 || col >= this.cols) return;
+        if (this.mines.includes(squareId)) {
+            this.gameStatus = 'lose';
+            return;
+        };
         if (this.squareStatus[squareId]) return;
 
-        const adjacentSquares = getAdjacentSquares(row, col);
+        const [row, col] = squareId.split('-').map(Number);
+        if (row < 0 || row >= this.rows || col < 0 || col >= this.cols) return;
+
+        const adjacentSquares = this.getAdjacentSquares(row, col);
         const minesAround = adjacentSquares.filter(key => this.mines.includes(key));
         this.squareStatus = { ...this.squareStatus, [squareId]: minesAround.length.toString() };
-
         if (minesAround.length > 0) return;
+
 
         for (let targetSquare of adjacentSquares) {
             this.checkSquare(targetSquare);
+        }
+    }
+
+    checkAdjacentSquares(squareId: string, flagged: string[]) {
+        const [row, col] = squareId.split('-').map(Number);
+        const adjacentSquares = this.getAdjacentSquares(row, col);
+        const adjacentFlags = adjacentSquares.filter(key => flagged.includes(key));
+        if (adjacentFlags.length === Number(this.squareStatus[squareId])) {
+            for (let targetSquare of adjacentSquares) {
+                this.checkSquare(targetSquare);
+            }
+        }
+    }
+
+    checkGameOver(squareId: string) {
+        if (this.mines.includes(squareId)) {
+            this.gameStatus = 'lose';
         }
     }
 }
