@@ -87,6 +87,7 @@ const Board = ({
     const flagSquare = (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
         const squareId = (e.target as Element).closest(`[${SQUARE_ID}]`)?.getAttribute(SQUARE_ID) || '';
+        if (squareStatus[squareId] || gameStatus !== 0) return;
         if (flagged.includes(squareId)) {
             setFlagged(flagged.filter(id => id !== squareId));
             setFlags(flags + 1);
