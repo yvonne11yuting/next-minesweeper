@@ -3,6 +3,12 @@ import { useEffect, useState } from "react";
 import { Bomb } from "lucide-react";
 import { initMines, getAdjacentSquares, generateBoard, checkGameOver, checkGameWin, SquareStatus } from "@/utils/minesweeperUtils";
 
+enum GameStatus {
+    playing = 0,
+    win = 1,
+    lose = -1
+}
+
 interface BoardProps {
     rows: number;
     cols: number;
@@ -18,7 +24,7 @@ const Board = ({
 }: BoardProps) => {
     const [mines, setMines] = useState<string[]>([]);
     const [squareStatus, setSquareStatus] = useState<SquareStatus>({});
-    const [gameStatus, setGameStatus] = useState<number>(0); // 0: playing, 1: win, -1: lose
+    const [gameStatus, setGameStatus] = useState<GameStatus>(0);
     const board = generateBoard(rows, cols);
 
     useEffect(() => {

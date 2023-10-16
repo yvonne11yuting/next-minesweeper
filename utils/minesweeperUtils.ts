@@ -1,5 +1,5 @@
-interface SquareStatus {
-    [key: string]: string; // key: row-col, value: tempStatus
+export interface SquareStatus {
+    [key: string]: '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | 'Flagged'; // key: row-col, value: tempStatus
 }
 
 export const generateBoard = (rows: number, cols: number): string[] => {
