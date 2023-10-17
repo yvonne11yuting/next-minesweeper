@@ -1,11 +1,10 @@
 "use client"
-import { useState } from 'react';
 import Board from './Board';
 
 const MinesweeperMain = ({
     rows = 9,
     cols = 9,
-    totalMines = 5,
+    totalMines = 10,
 }) => {
     return (
         <div>

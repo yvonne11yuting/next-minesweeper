@@ -88,6 +88,7 @@ const Board = ({
             <GameInfo
                 remainingFlags={totalMines - flagged.length}
                 startTimer={gameStatus === GameStatusEnum.PLAYING}
+                pauseTimer={!gameInProgress}
                 resetGame={resetGame}
             />
             <div className="grid w-80 sm:w-[500px] h-80 sm:h-[500px] cursor-default" style={{

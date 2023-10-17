@@ -4,12 +4,14 @@ import { AlarmClock, Flag, RotateCcw } from "lucide-react"
 interface GameInfoProps {
     remainingFlags: number;
     startTimer: boolean;
+    pauseTimer: boolean;
     resetGame: () => void;
 }
 
 const GameInfo = ({
     remainingFlags,
     startTimer,
+    pauseTimer,
     resetGame
 }: GameInfoProps) => {
     const [recordTime, setRecordTime] = useState<number>(0);
@@ -18,16 +20,19 @@ const GameInfo = ({
         let timer: number | undefined;
         if (startTimer) {
             timer = window.setInterval(() => {
-                setRecordTime(prev => prev + 1);
+                if (!pauseTimer) {
+                    setRecordTime(prev => prev + 1);
+                }
             }, 1000);
-        } else {
+        }
+        if (!startTimer && !pauseTimer) { // reset timer
             setRecordTime(0);
             window.clearInterval(timer);
         }
         return () => {
             window.clearInterval(timer);
         }
-    }, [startTimer]);
+    }, [startTimer, pauseTimer, recordTime]);
 
     return (
         <div className="flex justify-between pb-2">
