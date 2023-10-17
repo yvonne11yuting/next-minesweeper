@@ -88,7 +88,7 @@ const Board = ({
 
     return (
         <div className="relative">
-            <div className="grid w-80 sm:w-[500px] h-80 sm:h-[500px]" style={{
+            <div className="grid w-80 sm:w-[500px] h-80 sm:h-[500px] cursor-default" style={{
                 gridTemplateRows: `repeat(${rows}, 1fr)`,
                 gridTemplateColumns: `repeat(${cols}, 1fr)`
             }} onClick={clickSquare} onContextMenu={flagSquare}>
