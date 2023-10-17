@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Flag } from 'lucide-react';
 import Board from './Board';
 
-const Minesweeper = ({
+const MinesweeperMain = ({
     rows = 9,
     cols = 9,
     totalMines = 10,
@@ -27,5 +27,5 @@ const Minesweeper = ({
     )
 }
 
-export default Minesweeper
+export default MinesweeperMain
 

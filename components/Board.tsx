@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Bomb, Flag } from "lucide-react";
-import { checkGameWin, SquareStatus, MineSweeper } from "@/utils/minesweeperUtils";
+import { checkGameWin, SquareStatus, Minesweeper } from "@/utils/minesweeperUtils";
 
 enum GameStatus {
     playing = 0,
@@ -30,7 +30,7 @@ const Board = ({
     const [flagged, setFlagged] = useState<string[]>([]);
     const [squareStatus, setSquareStatus] = useState<SquareStatus>({});
     const [gameStatus, setGameStatus] = useState<GameStatus>(0);
-    const mineSweeper = new MineSweeper(rows, cols, mines, squareStatus)
+    const mineSweeper = new Minesweeper(rows, cols, mines, squareStatus)
     const board = mineSweeper.generateBoard;
 
     useEffect(() => {
@@ -109,13 +109,11 @@ const Board = ({
                         >
                             {
                                 gameStatus === -1 && isMine && !hasFlag && (
-                                    <Bomb color="#020617" />
+                                    <Bomb color="#020617" size="1rem" />
                                 )
                             }
                             {
-                                text && !hasFlag && (
-                                    <span className="text-2xl">{text}</span>
-                                )
+                                text && !hasFlag && text
                             }
                             {
                                 hasFlag && (

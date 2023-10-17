@@ -11,7 +11,7 @@ export const checkGameWin = (squareStatus: SquareStatus, totalSquares: number, t
     return false;
 }
 
-export class MineSweeper {
+export class Minesweeper {
     rows: number;
     cols: number;
     squareStatus: { [key: string]: string; };
@@ -62,7 +62,9 @@ export class MineSweeper {
 
     checkSquare(squareId: string) {
         if (this.mines.includes(squareId)) {
+            console.log('squareId', squareId);
             this.gameStatus = 'lose';
+            console.log('lose')
             return;
         };
         if (this.squareStatus[squareId]) return;
@@ -86,6 +88,8 @@ export class MineSweeper {
         const adjacentFlags = adjacentSquares.filter(key => flagged.includes(key));
         if (adjacentFlags.length === Number(this.squareStatus[squareId])) {
             for (let targetSquare of adjacentSquares) {
+                // by pass if square is flagged and is a mine
+                if (adjacentFlags.includes(targetSquare) && this.mines.includes(targetSquare)) continue;
                 this.checkSquare(targetSquare);
             }
         }
@@ -94,6 +98,7 @@ export class MineSweeper {
     checkGameOver(squareId: string) {
         if (this.mines.includes(squareId)) {
             this.gameStatus = 'lose';
+            console.log('lose')
         }
     }
 }
