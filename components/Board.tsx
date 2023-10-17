@@ -1,13 +1,8 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { Bomb, Flag } from "lucide-react";
-import { checkGameWin, SquareStatus, Minesweeper } from "@/utils/minesweeperUtils";
-
-enum GameStatus {
-    playing = 0,
-    win = 1,
-    lose = -1
-}
+import { SquareStatus, GameStatusEnum, Minesweeper } from "@/utils/minesweeperUtils";
+import GameStatus from "./GameStatus";
 
 interface BoardProps {
     rows: number;
@@ -29,39 +24,28 @@ const Board = ({
     const [mines, setMines] = useState<string[]>([]);
     const [flagged, setFlagged] = useState<string[]>([]);
     const [squareStatus, setSquareStatus] = useState<SquareStatus>({});
-    const [gameStatus, setGameStatus] = useState<GameStatus>(0);
-    const mineSweeper = new Minesweeper(rows, cols, mines, squareStatus)
+    const [gameStatus, setGameStatus] = useState<GameStatusEnum>(GameStatusEnum.PLAYING);
+    const mineSweeper = useMemo(() => new Minesweeper(rows, cols, mines, squareStatus), [rows, cols, mines, squareStatus])
     const board = mineSweeper.generateBoard;
-
-    useEffect(() => {
-        if (gameStatus === 0) {
-            const gameWin = checkGameWin(squareStatus, rows * cols, totalMines);
-            if (gameWin) {
-                setGameStatus(1);
-            }
-        }
-    }, [gameStatus, squareStatus, rows, cols, totalMines]);
 
     const clickSquare = (e: React.MouseEvent<HTMLDivElement>) => {
         const squareId = (e.target as Element).closest(`[${SQUARE_ID}]`)?.getAttribute(SQUARE_ID) || '';
-        const isClick = e.detail === 1;
+        const isSingleClick = e.detail === 1;
         const isDoubleClick = e.detail === 2;
 
-        const minesAreSet = mines.length > 0;
+        const minesInitialized = mines.length > 0;
         const isFlagged = flagged.includes(squareId);
-        if (!squareId || gameStatus !== 0 || isFlagged) return;
+        const numberedSquare = squareStatus[squareId] && squareStatus[squareId] !== '0';
+        if (!squareId || gameStatus !== GameStatusEnum.PLAYING || isFlagged) return;
 
-        if (minesAreSet) {
-            if (isDoubleClick && squareStatus[squareId] && squareStatus[squareId] !== '0') {
+        if (minesInitialized) {
+            if (isDoubleClick && numberedSquare) {
                 mineSweeper.checkAdjacentSquares(squareId, flagged);
             }
-            if (isClick) {
+            if (isSingleClick) {
                 mineSweeper.checkSquare(squareId);
             }
-
-            if (mineSweeper.gameStatus === 'lose') {
-                setGameStatus(-1)
-            }
+            checkGameStatus();
         } else {
             mineSweeper.initMines(squareId, totalMines);
             mineSweeper.checkSquare(squareId);
@@ -73,7 +57,7 @@ const Board = ({
     const flagSquare = (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
         const squareId = (e.target as Element).closest(`[${SQUARE_ID}]`)?.getAttribute(SQUARE_ID) || '';
-        if (squareStatus[squareId] || gameStatus !== 0) return;
+        if (squareStatus[squareId]) return;
         if (flagged.includes(squareId)) {
             setFlagged(flagged.filter(id => id !== squareId));
             setFlags(flags + 1);
@@ -83,46 +67,66 @@ const Board = ({
         }
     }
 
+    const checkGameStatus = () => {
+        if (mineSweeper.gameStatus === GameStatusEnum.LOSE) {
+            setGameStatus(GameStatusEnum.LOSE)
+        } else {
+            const gameWin = mineSweeper.checkGameWin();
+            if (gameWin) {
+                setGameStatus(GameStatusEnum.WIN);
+            }
+        }
+    }
+
     const resetGame = () => {
+        mineSweeper.resetGame();
         setMines([]);
+        setFlagged([]);
         setSquareStatus({});
-        setGameStatus(0);
+        setGameStatus(GameStatusEnum.PLAYING);
     }
 
     return (
-        <div className="grid w-80 sm:w-[500px] h-80 sm:h-[500px]" style={{
-            gridTemplateRows: `repeat(${rows}, 1fr)`,
-            gridTemplateColumns: `repeat(${cols}, 1fr)`
-        }} onClick={clickSquare} onContextMenu={flagSquare}>
+        <div className="relative">
+            <div className="grid w-80 sm:w-[500px] h-80 sm:h-[500px] cursor-default" style={{
+                gridTemplateRows: `repeat(${rows}, 1fr)`,
+                gridTemplateColumns: `repeat(${cols}, 1fr)`
+            }} onClick={clickSquare} onContextMenu={flagSquare}>
+                {
+                    board.map((squareId) => {
+                        const text = Number(squareStatus[squareId]) > 0 ? squareStatus[squareId] : '';
+                        const hasFlag = flagged.includes(squareId);
+                        const isGameOver = gameStatus === GameStatusEnum.LOSE && mines.includes(squareId) && !hasFlag;
+                        const bgColor = squareStatus[squareId] && !hasFlag ? 'bg-lime-500' : 'bg-lime-300'
+                        const wrongFlagStyles = '-rotate-90 transition ease-out duration-1000';
+                        return (
+                            <div
+                                data-square={squareId}
+                                key={squareId}
+                                className={`flex justify-center items-center border border-lime-200 ${bgColor}`}
+                            >
+                                {
+                                    isGameOver && (<Bomb color="#020617" />)
+                                }
+                                {
+                                    text && !hasFlag && text
+                                }
+                                {
+                                    hasFlag && (
+                                        <Flag className={`${text ? wrongFlagStyles : ''}`} color="#dc2626" />
+                                    )
+                                }
+                            </div>
+                        )
+                    })
+                }
+            </div>
             {
-                board.map((squareId) => {
-                    const text = Number(squareStatus[squareId]) > 0 ? squareStatus[squareId] : '';
-                    const isMine = mines.includes(squareId);
-                    const hasFlag = flagged.includes(squareId);
-                    const bgColor = squareStatus[squareId] && !hasFlag ? 'bg-lime-500' : 'bg-lime-300'
-                    const wrongFlagStyles = '-rotate-90 transition ease-out duration-1000';
-                    return (
-                        <div
-                            data-square={squareId}
-                            key={squareId}
-                            className={`flex justify-center items-center border border-lime-200 ${bgColor}`}
-                        >
-                            {
-                                gameStatus === -1 && isMine && !hasFlag && (
-                                    <Bomb color="#020617" size="1rem" />
-                                )
-                            }
-                            {
-                                text && !hasFlag && text
-                            }
-                            {
-                                hasFlag && (
-                                    <Flag className={`${text ? wrongFlagStyles : ''}`} color="#dc2626" />
-                                )
-                            }
-                        </div>
-                    )
-                })
+                gameStatus !== GameStatusEnum.PLAYING && (
+                    <div className="absolute top-0 left-0 flex items-center justify-center w-full h-full">
+                        <GameStatus status={gameStatus} resetGame={resetGame} />
+                    </div>
+                )
             }
         </div>
     )
