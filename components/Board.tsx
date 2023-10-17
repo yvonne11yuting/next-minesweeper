@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Bomb, Flag } from "lucide-react";
-import { initMines, getAdjacentSquares, generateBoard, checkGameOver, checkGameWin, SquareStatus } from "@/utils/minesweeperUtils";
+import { checkGameWin, SquareStatus, Minesweeper } from "@/utils/minesweeperUtils";
 
 enum GameStatus {
     playing = 0,
@@ -30,7 +30,8 @@ const Board = ({
     const [flagged, setFlagged] = useState<string[]>([]);
     const [squareStatus, setSquareStatus] = useState<SquareStatus>({});
     const [gameStatus, setGameStatus] = useState<GameStatus>(0);
-    const board = generateBoard(rows, cols);
+    const mineSweeper = new Minesweeper(rows, cols, mines, squareStatus)
+    const board = mineSweeper.generateBoard;
 
     useEffect(() => {
         if (gameStatus === 0) {
@@ -42,46 +43,31 @@ const Board = ({
     }, [gameStatus, squareStatus, rows, cols, totalMines]);
 
     const clickSquare = (e: React.MouseEvent<HTMLDivElement>) => {
-        let tempStatus: SquareStatus = {};
         const squareId = (e.target as Element).closest(`[${SQUARE_ID}]`)?.getAttribute(SQUARE_ID) || '';
+        const isClick = e.detail === 1;
+        const isDoubleClick = e.detail === 2;
+
         const minesAreSet = mines.length > 0;
         const isFlagged = flagged.includes(squareId);
         if (!squareId || gameStatus !== 0 || isFlagged) return;
 
         if (minesAreSet) {
-            const isMine = checkGameOver(squareId, mines);
-            if (isMine) {
+            if (isDoubleClick && squareStatus[squareId] && squareStatus[squareId] !== '0') {
+                mineSweeper.checkAdjacentSquares(squareId, flagged);
+            }
+            if (isClick) {
+                mineSweeper.checkSquare(squareId);
+            }
+
+            if (mineSweeper.gameStatus === 'lose') {
                 setGameStatus(-1)
-            } else {
-                checkMines(squareId, mines, squareStatus);
             }
         } else {
-            const newMines = initMines({
-                rows,
-                cols,
-                firstPosition: squareId,
-                totalMines
-            });
-            checkMines(squareId, newMines, {});
-            setMines(newMines);
+            mineSweeper.initMines(squareId, totalMines);
+            mineSweeper.checkSquare(squareId);
+            setMines(mineSweeper.mines);
         }
-        setSquareStatus({ ...squareStatus, ...tempStatus });
-
-        function checkMines(squareId: string, baseMines: string[], curStatus: SquareStatus) {
-            const [row, col] = squareId.split('-').map(Number);
-            if (row < 0 || row >= rows || col < 0 || col >= cols) return;
-            if (curStatus[squareId]) return;
-
-            const adjacentSquares = getAdjacentSquares(row, col);
-            const minesAround = adjacentSquares.filter(key => baseMines.includes(key));
-            tempStatus = { ...tempStatus, [squareId]: minesAround.length.toString() };
-
-            if (minesAround.length > 0) return;
-
-            for (let targetSquare of adjacentSquares) {
-                checkMines(targetSquare, baseMines, tempStatus);
-            }
-        }
+        setSquareStatus({ ...squareStatus, ...mineSweeper.squareStatus });
     }
 
     const flagSquare = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -114,6 +100,7 @@ const Board = ({
                     const isMine = mines.includes(squareId);
                     const hasFlag = flagged.includes(squareId);
                     const bgColor = squareStatus[squareId] && !hasFlag ? 'bg-lime-500' : 'bg-lime-300'
+                    const wrongFlagStyles = '-rotate-90 transition ease-out duration-1000';
                     return (
                         <div
                             data-square={squareId}
@@ -122,17 +109,15 @@ const Board = ({
                         >
                             {
                                 gameStatus === -1 && isMine && !hasFlag && (
-                                    <Bomb color="#020617" />
+                                    <Bomb color="#020617" size="1rem" />
                                 )
                             }
                             {
-                                text && (
-                                    <span className="text-2xl">{text}</span>
-                                )
+                                text && !hasFlag && text
                             }
                             {
                                 hasFlag && (
-                                    <Flag color="#dc2626" />
+                                    <Flag className={`${text ? wrongFlagStyles : ''}`} color="#dc2626" />
                                 )
                             }
                         </div>
