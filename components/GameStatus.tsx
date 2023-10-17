@@ -6,6 +6,7 @@ interface GameStatusProps {
 }
 
 const GAME_STATUS_TEXT = {
+    [GameStatusEnum.INIT]: '',
     [GameStatusEnum.LOSE]: 'Game Over 😭',
     [GameStatusEnum.WIN]: 'You Win! 🥳',
     [GameStatusEnum.PLAYING]: '',
