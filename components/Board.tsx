@@ -1,7 +1,8 @@
 "use client";
 import { useMemo, useState } from "react";
 import { Bomb, Flag } from "lucide-react";
-import { SquareStatus, GameStatus, Minesweeper } from "@/utils/minesweeperUtils";
+import { SquareStatus, GameStatusEnum, Minesweeper } from "@/utils/minesweeperUtils";
+import GameStatus from "./GameStatus";
 
 interface BoardProps {
     rows: number;
@@ -23,7 +24,7 @@ const Board = ({
     const [mines, setMines] = useState<string[]>([]);
     const [flagged, setFlagged] = useState<string[]>([]);
     const [squareStatus, setSquareStatus] = useState<SquareStatus>({});
-    const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.PLAYING);
+    const [gameStatus, setGameStatus] = useState<GameStatusEnum>(GameStatusEnum.PLAYING);
     const mineSweeper = useMemo(() => new Minesweeper(rows, cols, mines, squareStatus), [rows, cols, mines, squareStatus])
     const board = mineSweeper.generateBoard;
 
@@ -35,7 +36,7 @@ const Board = ({
         const minesInitialized = mines.length > 0;
         const isFlagged = flagged.includes(squareId);
         const numberedSquare = squareStatus[squareId] && squareStatus[squareId] !== '0';
-        if (!squareId || gameStatus !== GameStatus.PLAYING || isFlagged) return;
+        if (!squareId || gameStatus !== GameStatusEnum.PLAYING || isFlagged) return;
 
         if (minesInitialized) {
             if (isDoubleClick && numberedSquare) {
@@ -67,56 +68,65 @@ const Board = ({
     }
 
     const checkGameStatus = () => {
-        if (mineSweeper.gameStatus === GameStatus.LOSE) {
-            setGameStatus(GameStatus.LOSE)
+        if (mineSweeper.gameStatus === GameStatusEnum.LOSE) {
+            setGameStatus(GameStatusEnum.LOSE)
         } else {
             const gameWin = mineSweeper.checkGameWin();
             if (gameWin) {
-                setGameStatus(GameStatus.WIN);
+                setGameStatus(GameStatusEnum.WIN);
             }
         }
     }
 
     const resetGame = () => {
+        mineSweeper.resetGame();
         setMines([]);
+        setFlagged([]);
         setSquareStatus({});
-        setGameStatus(GameStatus.PLAYING);
+        setGameStatus(GameStatusEnum.PLAYING);
     }
 
     return (
-        <div className="grid w-80 sm:w-[500px] h-80 sm:h-[500px]" style={{
-            gridTemplateRows: `repeat(${rows}, 1fr)`,
-            gridTemplateColumns: `repeat(${cols}, 1fr)`
-        }} onClick={clickSquare} onContextMenu={flagSquare}>
+        <div className="relative">
+            <div className="grid w-80 sm:w-[500px] h-80 sm:h-[500px]" style={{
+                gridTemplateRows: `repeat(${rows}, 1fr)`,
+                gridTemplateColumns: `repeat(${cols}, 1fr)`
+            }} onClick={clickSquare} onContextMenu={flagSquare}>
+                {
+                    board.map((squareId) => {
+                        const text = Number(squareStatus[squareId]) > 0 ? squareStatus[squareId] : '';
+                        const hasFlag = flagged.includes(squareId);
+                        const isGameOver = gameStatus === GameStatusEnum.LOSE && mines.includes(squareId) && !hasFlag;
+                        const bgColor = squareStatus[squareId] && !hasFlag ? 'bg-lime-500' : 'bg-lime-300'
+                        const wrongFlagStyles = '-rotate-90 transition ease-out duration-1000';
+                        return (
+                            <div
+                                data-square={squareId}
+                                key={squareId}
+                                className={`flex justify-center items-center border border-lime-200 ${bgColor}`}
+                            >
+                                {
+                                    isGameOver && (<Bomb color="#020617" />)
+                                }
+                                {
+                                    text && !hasFlag && text
+                                }
+                                {
+                                    hasFlag && (
+                                        <Flag className={`${text ? wrongFlagStyles : ''}`} color="#dc2626" />
+                                    )
+                                }
+                            </div>
+                        )
+                    })
+                }
+            </div>
             {
-                board.map((squareId) => {
-                    const text = Number(squareStatus[squareId]) > 0 ? squareStatus[squareId] : '';
-                    const isMine = mines.includes(squareId);
-                    const hasFlag = flagged.includes(squareId);
-                    const bgColor = squareStatus[squareId] && !hasFlag ? 'bg-lime-500' : 'bg-lime-300'
-                    const wrongFlagStyles = '-rotate-90 transition ease-out duration-1000';
-                    return (
-                        <div
-                            data-square={squareId}
-                            key={squareId}
-                            className={`flex justify-center items-center border border-lime-200 ${bgColor}`}
-                        >
-                            {
-                                gameStatus === GameStatus.LOSE && isMine && !hasFlag && (
-                                    <Bomb color="#020617" size="1rem" />
-                                )
-                            }
-                            {
-                                text && !hasFlag && text
-                            }
-                            {
-                                hasFlag && (
-                                    <Flag className={`${text ? wrongFlagStyles : ''}`} color="#dc2626" />
-                                )
-                            }
-                        </div>
-                    )
-                })
+                gameStatus !== GameStatusEnum.PLAYING && (
+                    <div className="absolute top-0 left-0 flex items-center justify-center w-full h-full">
+                        <GameStatus status={gameStatus} resetGame={resetGame} />
+                    </div>
+                )
             }
         </div>
     )

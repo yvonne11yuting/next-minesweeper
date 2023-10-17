@@ -2,7 +2,7 @@ export interface SquareStatus {
     [key: string]: string; // '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8'
 }
 
-export enum GameStatus {
+export enum GameStatusEnum {
     PLAYING = 'PLAYING',
     WIN = 'WIN',
     LOSE = 'LOSE'
@@ -13,7 +13,7 @@ export class Minesweeper {
     cols: number;
     squareStatus: { [key: string]: string; };
     mines: string[];
-    gameStatus: GameStatus = GameStatus.PLAYING;
+    gameStatus: GameStatusEnum = GameStatusEnum.PLAYING;
 
     constructor(rows: number, cols: number, mines: string[], squareStatus: { [key: string]: string; }) {
         this.rows = rows;
@@ -59,7 +59,7 @@ export class Minesweeper {
 
     checkSquare(squareId: string) {
         if (this.mines.includes(squareId)) {
-            this.gameStatus = GameStatus.LOSE;
+            this.gameStatus = GameStatusEnum.LOSE;
             return;
         };
         if (this.squareStatus[squareId]) return;
@@ -93,9 +93,15 @@ export class Minesweeper {
     checkGameWin = () => {
         const totalOpened = Object.keys(this.squareStatus).length;
         if (totalOpened + this.mines.length === this.rows * this.cols) {
-            this.gameStatus = GameStatus.WIN;
+            this.gameStatus = GameStatusEnum.WIN;
             return true;
         }
         return false;
+    }
+
+    resetGame() {
+        this.gameStatus = GameStatusEnum.PLAYING;
+        this.mines = [];
+        this.squareStatus = {};
     }
 }
