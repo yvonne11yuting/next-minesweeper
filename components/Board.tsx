@@ -2,14 +2,13 @@
 import { useMemo, useState } from "react";
 import { Bomb, Flag } from "lucide-react";
 import { SquareStatus, GameStatusEnum, Minesweeper } from "@/utils/minesweeperUtils";
+import GameInfo from "./GameInfo";
 import GameStatus from "./GameStatus";
 
 interface BoardProps {
     rows: number;
     cols: number;
     totalMines: number;
-    flags: number
-    setFlags: (flags: number) => void;
 }
 
 const SQUARE_ID = 'data-square';
@@ -18,25 +17,24 @@ const Board = ({
     rows,
     cols,
     totalMines,
-    flags,
-    setFlags
 }: BoardProps) => {
     const [mines, setMines] = useState<string[]>([]);
     const [flagged, setFlagged] = useState<string[]>([]);
     const [squareStatus, setSquareStatus] = useState<SquareStatus>({});
-    const [gameStatus, setGameStatus] = useState<GameStatusEnum>(GameStatusEnum.PLAYING);
+    const [gameStatus, setGameStatus] = useState<GameStatusEnum>(GameStatusEnum.INIT);
     const mineSweeper = useMemo(() => new Minesweeper(rows, cols, mines, squareStatus), [rows, cols, mines, squareStatus])
     const board = mineSweeper.generateBoard;
+    const gameInProgress = gameStatus === GameStatusEnum.INIT || gameStatus === GameStatusEnum.PLAYING;
 
     const clickSquare = (e: React.MouseEvent<HTMLDivElement>) => {
         const squareId = (e.target as Element).closest(`[${SQUARE_ID}]`)?.getAttribute(SQUARE_ID) || '';
         const isSingleClick = e.detail === 1;
         const isDoubleClick = e.detail === 2;
-
         const minesInitialized = mines.length > 0;
         const isFlagged = flagged.includes(squareId);
         const numberedSquare = squareStatus[squareId] && squareStatus[squareId] !== '0';
-        if (!squareId || gameStatus !== GameStatusEnum.PLAYING || isFlagged) return;
+
+        if (!squareId || isFlagged) return;
 
         if (minesInitialized) {
             if (isDoubleClick && numberedSquare) {
@@ -50,6 +48,7 @@ const Board = ({
             mineSweeper.initMines(squareId, totalMines);
             mineSweeper.checkSquare(squareId);
             setMines(mineSweeper.mines);
+            setGameStatus(GameStatusEnum.PLAYING);
         }
         setSquareStatus({ ...squareStatus, ...mineSweeper.squareStatus });
     }
@@ -60,10 +59,8 @@ const Board = ({
         if (squareStatus[squareId]) return;
         if (flagged.includes(squareId)) {
             setFlagged(flagged.filter(id => id !== squareId));
-            setFlags(flags + 1);
         } else {
             setFlagged([...flagged, squareId]);
-            setFlags(flags - 1);
         }
     }
 
@@ -83,11 +80,17 @@ const Board = ({
         setMines([]);
         setFlagged([]);
         setSquareStatus({});
-        setGameStatus(GameStatusEnum.PLAYING);
+        setGameStatus(GameStatusEnum.INIT);
     }
 
     return (
         <div className="relative">
+            <GameInfo
+                remainingFlags={totalMines - flagged.length}
+                startTimer={gameStatus === GameStatusEnum.PLAYING}
+                pauseTimer={!gameInProgress}
+                resetGame={resetGame}
+            />
             <div className="grid w-80 sm:w-[500px] h-80 sm:h-[500px] cursor-default" style={{
                 gridTemplateRows: `repeat(${rows}, 1fr)`,
                 gridTemplateColumns: `repeat(${cols}, 1fr)`
@@ -122,7 +125,7 @@ const Board = ({
                 }
             </div>
             {
-                gameStatus !== GameStatusEnum.PLAYING && (
+                !gameInProgress && (
                     <div className="absolute top-0 left-0 flex items-center justify-center w-full h-full">
                         <GameStatus status={gameStatus} resetGame={resetGame} />
                     </div>

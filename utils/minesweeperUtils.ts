@@ -3,6 +3,7 @@ export interface SquareStatus {
 }
 
 export enum GameStatusEnum {
+    INIT = 'INIT',
     PLAYING = 'PLAYING',
     WIN = 'WIN',
     LOSE = 'LOSE'
@@ -13,7 +14,7 @@ export class Minesweeper {
     cols: number;
     squareStatus: { [key: string]: string; };
     mines: string[];
-    gameStatus: GameStatusEnum = GameStatusEnum.PLAYING;
+    gameStatus: GameStatusEnum = GameStatusEnum.INIT;
 
     constructor(rows: number, cols: number, mines: string[], squareStatus: { [key: string]: string; }) {
         this.rows = rows;
@@ -55,6 +56,7 @@ export class Minesweeper {
             }
         }
         this.mines = newMines;
+        this.gameStatus = GameStatusEnum.PLAYING;
     }
 
     checkSquare(squareId: string) {
@@ -100,7 +102,7 @@ export class Minesweeper {
     }
 
     resetGame() {
-        this.gameStatus = GameStatusEnum.PLAYING;
+        this.gameStatus = GameStatusEnum.INIT;
         this.mines = [];
         this.squareStatus = {};
     }
