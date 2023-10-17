@@ -1,13 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { Bomb, Flag } from "lucide-react";
-import { checkGameWin, SquareStatus, Minesweeper } from "@/utils/minesweeperUtils";
-
-enum GameStatus {
-    playing = 0,
-    win = 1,
-    lose = -1
-}
+import { SquareStatus, GameStatus, Minesweeper } from "@/utils/minesweeperUtils";
 
 interface BoardProps {
     rows: number;
@@ -29,39 +23,28 @@ const Board = ({
     const [mines, setMines] = useState<string[]>([]);
     const [flagged, setFlagged] = useState<string[]>([]);
     const [squareStatus, setSquareStatus] = useState<SquareStatus>({});
-    const [gameStatus, setGameStatus] = useState<GameStatus>(0);
-    const mineSweeper = new Minesweeper(rows, cols, mines, squareStatus)
+    const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.PLAYING);
+    const mineSweeper = useMemo(() => new Minesweeper(rows, cols, mines, squareStatus), [rows, cols, mines, squareStatus])
     const board = mineSweeper.generateBoard;
-
-    useEffect(() => {
-        if (gameStatus === 0) {
-            const gameWin = checkGameWin(squareStatus, rows * cols, totalMines);
-            if (gameWin) {
-                setGameStatus(1);
-            }
-        }
-    }, [gameStatus, squareStatus, rows, cols, totalMines]);
 
     const clickSquare = (e: React.MouseEvent<HTMLDivElement>) => {
         const squareId = (e.target as Element).closest(`[${SQUARE_ID}]`)?.getAttribute(SQUARE_ID) || '';
-        const isClick = e.detail === 1;
+        const isSingleClick = e.detail === 1;
         const isDoubleClick = e.detail === 2;
 
-        const minesAreSet = mines.length > 0;
+        const minesInitialized = mines.length > 0;
         const isFlagged = flagged.includes(squareId);
-        if (!squareId || gameStatus !== 0 || isFlagged) return;
+        const numberedSquare = squareStatus[squareId] && squareStatus[squareId] !== '0';
+        if (!squareId || gameStatus !== GameStatus.PLAYING || isFlagged) return;
 
-        if (minesAreSet) {
-            if (isDoubleClick && squareStatus[squareId] && squareStatus[squareId] !== '0') {
+        if (minesInitialized) {
+            if (isDoubleClick && numberedSquare) {
                 mineSweeper.checkAdjacentSquares(squareId, flagged);
             }
-            if (isClick) {
+            if (isSingleClick) {
                 mineSweeper.checkSquare(squareId);
             }
-
-            if (mineSweeper.gameStatus === 'lose') {
-                setGameStatus(-1)
-            }
+            checkGameStatus();
         } else {
             mineSweeper.initMines(squareId, totalMines);
             mineSweeper.checkSquare(squareId);
@@ -73,7 +56,7 @@ const Board = ({
     const flagSquare = (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
         const squareId = (e.target as Element).closest(`[${SQUARE_ID}]`)?.getAttribute(SQUARE_ID) || '';
-        if (squareStatus[squareId] || gameStatus !== 0) return;
+        if (squareStatus[squareId]) return;
         if (flagged.includes(squareId)) {
             setFlagged(flagged.filter(id => id !== squareId));
             setFlags(flags + 1);
@@ -83,10 +66,21 @@ const Board = ({
         }
     }
 
+    const checkGameStatus = () => {
+        if (mineSweeper.gameStatus === GameStatus.LOSE) {
+            setGameStatus(GameStatus.LOSE)
+        } else {
+            const gameWin = mineSweeper.checkGameWin();
+            if (gameWin) {
+                setGameStatus(GameStatus.WIN);
+            }
+        }
+    }
+
     const resetGame = () => {
         setMines([]);
         setSquareStatus({});
-        setGameStatus(0);
+        setGameStatus(GameStatus.PLAYING);
     }
 
     return (
@@ -108,7 +102,7 @@ const Board = ({
                             className={`flex justify-center items-center border border-lime-200 ${bgColor}`}
                         >
                             {
-                                gameStatus === -1 && isMine && !hasFlag && (
+                                gameStatus === GameStatus.LOSE && isMine && !hasFlag && (
                                     <Bomb color="#020617" size="1rem" />
                                 )
                             }

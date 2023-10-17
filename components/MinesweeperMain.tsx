@@ -6,7 +6,7 @@ import Board from './Board';
 const MinesweeperMain = ({
     rows = 9,
     cols = 9,
-    totalMines = 10,
+    totalMines = 5,
 }) => {
     const [flags, setFlags] = useState<number>(totalMines);
     return (

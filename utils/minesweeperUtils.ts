@@ -2,13 +2,10 @@ export interface SquareStatus {
     [key: string]: string; // '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8'
 }
 
-export const checkGameWin = (squareStatus: SquareStatus, totalSquares: number, totalMines: number) => {
-    const totalOpened = Object.keys(squareStatus).length;
-    if (totalOpened + totalMines === totalSquares) {
-        console.log('win')
-        return true;
-    }
-    return false;
+export enum GameStatus {
+    PLAYING = 'PLAYING',
+    WIN = 'WIN',
+    LOSE = 'LOSE'
 }
 
 export class Minesweeper {
@@ -16,7 +13,7 @@ export class Minesweeper {
     cols: number;
     squareStatus: { [key: string]: string; };
     mines: string[];
-    gameStatus: 'playing' | 'win' | 'lose' = 'playing';
+    gameStatus: GameStatus = GameStatus.PLAYING;
 
     constructor(rows: number, cols: number, mines: string[], squareStatus: { [key: string]: string; }) {
         this.rows = rows;
@@ -62,9 +59,7 @@ export class Minesweeper {
 
     checkSquare(squareId: string) {
         if (this.mines.includes(squareId)) {
-            console.log('squareId', squareId);
-            this.gameStatus = 'lose';
-            console.log('lose')
+            this.gameStatus = GameStatus.LOSE;
             return;
         };
         if (this.squareStatus[squareId]) return;
@@ -95,10 +90,12 @@ export class Minesweeper {
         }
     }
 
-    checkGameOver(squareId: string) {
-        if (this.mines.includes(squareId)) {
-            this.gameStatus = 'lose';
-            console.log('lose')
+    checkGameWin = () => {
+        const totalOpened = Object.keys(this.squareStatus).length;
+        if (totalOpened + this.mines.length === this.rows * this.cols) {
+            this.gameStatus = GameStatus.WIN;
+            return true;
         }
+        return false;
     }
 }
