@@ -8,8 +8,6 @@ interface BoardProps {
     rows: number;
     cols: number;
     totalMines: number;
-    flags: number
-    setFlags: (flags: number) => void;
 }
 
 const SQUARE_ID = 'data-square';
@@ -18,8 +16,6 @@ const Board = ({
     rows,
     cols,
     totalMines,
-    flags,
-    setFlags
 }: BoardProps) => {
     const [mines, setMines] = useState<string[]>([]);
     const [flagged, setFlagged] = useState<string[]>([]);
@@ -32,10 +28,10 @@ const Board = ({
         const squareId = (e.target as Element).closest(`[${SQUARE_ID}]`)?.getAttribute(SQUARE_ID) || '';
         const isSingleClick = e.detail === 1;
         const isDoubleClick = e.detail === 2;
-
         const minesInitialized = mines.length > 0;
         const isFlagged = flagged.includes(squareId);
         const numberedSquare = squareStatus[squareId] && squareStatus[squareId] !== '0';
+
         if (!squareId || gameStatus !== GameStatusEnum.PLAYING || isFlagged) return;
 
         if (minesInitialized) {
@@ -60,10 +56,8 @@ const Board = ({
         if (squareStatus[squareId]) return;
         if (flagged.includes(squareId)) {
             setFlagged(flagged.filter(id => id !== squareId));
-            setFlags(flags + 1);
         } else {
             setFlagged([...flagged, squareId]);
-            setFlags(flags - 1);
         }
     }
 
@@ -88,6 +82,11 @@ const Board = ({
 
     return (
         <div className="relative">
+            <div>
+                <span className="inline-flex gap-2">
+                    <Flag color="#dc2626" />{mines.length - flagged.length}
+                </span>
+            </div>
             <div className="grid w-80 sm:w-[500px] h-80 sm:h-[500px] cursor-default" style={{
                 gridTemplateRows: `repeat(${rows}, 1fr)`,
                 gridTemplateColumns: `repeat(${cols}, 1fr)`
