@@ -42,7 +42,7 @@ const GameInfo = ({
             <button onClick={resetGame}>
                 <RotateCcw color="#a855f7" />
             </button>
-            <span className="inline-flex gap-2">
+            <span className="inline-flex gap-2 w-20">
                 <AlarmClock color="#f59e0b" />{recordTime}
             </span>
         </div>
