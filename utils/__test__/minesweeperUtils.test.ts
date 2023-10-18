@@ -1,5 +1,15 @@
 import { GameStatusEnum, Minesweeper } from '../minesweeperUtils';
 
+/* Test cases
+    1. should generate the board correctly
+    2. should initialize mines correctly
+    3. should lose when the target square is a mine
+    4. should record square status when there are mines around the target square
+    5. should check adjacent squares correctly
+    6. should check game win correctly
+    7. should reset the game correctly
+**/
+
 describe('Minesweeper', () => {
     let minesweeper: Minesweeper;
     let mockGenerateMine: jest.SpyInstance;

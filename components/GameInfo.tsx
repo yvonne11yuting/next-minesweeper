@@ -37,13 +37,15 @@ const GameInfo = ({
     return (
         <div className="flex justify-between pb-2">
             <span className="inline-flex gap-2">
-                <Flag color="#dc2626" />{remainingFlags}
+                <Flag color="#dc2626" />
+                <span data-testid="GAME_FLAGS_NUM">{remainingFlags}</span>
             </span>
             <button onClick={resetGame}>
                 <RotateCcw color="#a855f7" />
             </button>
             <span className="inline-flex gap-2 w-20">
-                <AlarmClock color="#f59e0b" />{recordTime}
+                <AlarmClock color="#f59e0b" />
+                <span>{recordTime}</span>
             </span>
         </div>
     )
