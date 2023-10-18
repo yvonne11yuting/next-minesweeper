@@ -2,6 +2,7 @@
 import { useMemo, useState } from "react";
 import { Bomb, Flag } from "lucide-react";
 import { SquareStatus, GameStatusEnum, Minesweeper } from "@/utils/minesweeperUtils";
+import { domUtils } from "@/utils/domUtils";
 import GameInfo from "./GameInfo";
 import GameStatus from "./GameStatus";
 
@@ -10,8 +11,6 @@ interface BoardProps {
     cols: number;
     totalMines: number;
 }
-
-const SQUARE_ID = 'data-square';
 
 const Board = ({
     rows,
@@ -27,7 +26,7 @@ const Board = ({
     const gameInProgress = gameStatus === GameStatusEnum.INIT || gameStatus === GameStatusEnum.PLAYING;
 
     const clickSquare = (e: React.MouseEvent<HTMLDivElement>) => {
-        const squareId = (e.target as Element).closest(`[${SQUARE_ID}]`)?.getAttribute(SQUARE_ID) || '';
+        const squareId = domUtils.getDataSquare(e);
         const isSingleClick = e.detail === 1;
         const isDoubleClick = e.detail === 2;
         const minesInitialized = mines.length > 0;
@@ -43,7 +42,6 @@ const Board = ({
             if (isSingleClick) {
                 mineSweeper.checkSquare(squareId);
             }
-            checkGameStatus();
         } else {
             mineSweeper.initMines(squareId, totalMines);
             mineSweeper.checkSquare(squareId);
@@ -51,11 +49,12 @@ const Board = ({
             setGameStatus(GameStatusEnum.PLAYING);
         }
         setSquareStatus({ ...squareStatus, ...mineSweeper.squareStatus });
+        checkGameStatus();
     }
 
     const flagSquare = (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
-        const squareId = (e.target as Element).closest(`[${SQUARE_ID}]`)?.getAttribute(SQUARE_ID) || '';
+        const squareId = domUtils.getDataSquare(e);
         if (squareStatus[squareId]) return;
         if (flagged.includes(squareId)) {
             setFlagged(flagged.filter(id => id !== squareId));
@@ -92,7 +91,7 @@ const Board = ({
                 resetGame={resetGame}
             />
             <div className="relative">
-                <div className="grid w-80 sm:w-[500px] h-80 sm:h-[500px] cursor-default" style={{
+                <div data-testid="GAME_BOARD" className="grid w-80 sm:w-[500px] h-80 sm:h-[500px] cursor-default" style={{
                     gridTemplateRows: `repeat(${rows}, 1fr)`,
                     gridTemplateColumns: `repeat(${cols}, 1fr)`
                 }} onClick={clickSquare} onContextMenu={flagSquare}>
@@ -106,7 +105,9 @@ const Board = ({
                             return (
                                 <div
                                     data-square={squareId}
+                                    data-testid={`SQUARE_${squareId}`}
                                     key={squareId}
+                                    role="button"
                                     className={`flex justify-center text-lg sm:text-xl items-center border border-lime-200 ${bgColor}`}
                                 >
                                     {
@@ -117,7 +118,7 @@ const Board = ({
                                     }
                                     {
                                         hasFlag && (
-                                            <Flag className={`${text ? wrongFlagStyles : ''}`} color="#dc2626" />
+                                            <Flag data-testid={`FLAG_${squareId}`} className={`${text ? wrongFlagStyles : ''}`} color="#dc2626" />
                                         )
                                     }
                                 </div>
