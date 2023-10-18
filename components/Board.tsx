@@ -84,54 +84,56 @@ const Board = ({
     }
 
     return (
-        <div className="relative">
+        <>
             <GameInfo
                 remainingFlags={totalMines - flagged.length}
                 startTimer={gameStatus === GameStatusEnum.PLAYING}
                 pauseTimer={!gameInProgress}
                 resetGame={resetGame}
             />
-            <div className="grid w-80 sm:w-[500px] h-80 sm:h-[500px] cursor-default" style={{
-                gridTemplateRows: `repeat(${rows}, 1fr)`,
-                gridTemplateColumns: `repeat(${cols}, 1fr)`
-            }} onClick={clickSquare} onContextMenu={flagSquare}>
+            <div className="relative">
+                <div className="grid w-80 sm:w-[500px] h-80 sm:h-[500px] cursor-default" style={{
+                    gridTemplateRows: `repeat(${rows}, 1fr)`,
+                    gridTemplateColumns: `repeat(${cols}, 1fr)`
+                }} onClick={clickSquare} onContextMenu={flagSquare}>
+                    {
+                        board.map((squareId) => {
+                            const text = Number(squareStatus[squareId]) > 0 ? squareStatus[squareId] : '';
+                            const hasFlag = flagged.includes(squareId);
+                            const isGameOver = gameStatus === GameStatusEnum.LOSE && mines.includes(squareId) && !hasFlag;
+                            const bgColor = squareStatus[squareId] && !hasFlag ? 'bg-lime-500' : 'bg-lime-300'
+                            const wrongFlagStyles = '-rotate-90 transition ease-out duration-1000';
+                            return (
+                                <div
+                                    data-square={squareId}
+                                    key={squareId}
+                                    className={`flex justify-center text-lg sm:text-xl items-center border border-lime-200 ${bgColor}`}
+                                >
+                                    {
+                                        isGameOver && (<Bomb color="#020617" />)
+                                    }
+                                    {
+                                        text && !hasFlag && text
+                                    }
+                                    {
+                                        hasFlag && (
+                                            <Flag className={`${text ? wrongFlagStyles : ''}`} color="#dc2626" />
+                                        )
+                                    }
+                                </div>
+                            )
+                        })
+                    }
+                </div>
                 {
-                    board.map((squareId) => {
-                        const text = Number(squareStatus[squareId]) > 0 ? squareStatus[squareId] : '';
-                        const hasFlag = flagged.includes(squareId);
-                        const isGameOver = gameStatus === GameStatusEnum.LOSE && mines.includes(squareId) && !hasFlag;
-                        const bgColor = squareStatus[squareId] && !hasFlag ? 'bg-lime-500' : 'bg-lime-300'
-                        const wrongFlagStyles = '-rotate-90 transition ease-out duration-1000';
-                        return (
-                            <div
-                                data-square={squareId}
-                                key={squareId}
-                                className={`flex justify-center items-center border border-lime-200 ${bgColor}`}
-                            >
-                                {
-                                    isGameOver && (<Bomb color="#020617" />)
-                                }
-                                {
-                                    text && !hasFlag && text
-                                }
-                                {
-                                    hasFlag && (
-                                        <Flag className={`${text ? wrongFlagStyles : ''}`} color="#dc2626" />
-                                    )
-                                }
-                            </div>
-                        )
-                    })
+                    !gameInProgress && (
+                        <div className="absolute top-0 left-0 flex items-center justify-center w-full h-full">
+                            <GameStatus status={gameStatus} resetGame={resetGame} />
+                        </div>
+                    )
                 }
             </div>
-            {
-                !gameInProgress && (
-                    <div className="absolute top-0 left-0 flex items-center justify-center w-full h-full">
-                        <GameStatus status={gameStatus} resetGame={resetGame} />
-                    </div>
-                )
-            }
-        </div>
+        </>
     )
 }
 
