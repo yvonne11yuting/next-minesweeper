@@ -123,7 +123,7 @@ describe('Board', () => {
         const gameGuideBtn = screen.getByTestId('GAME_GUIDE_BTN');
         expect(screen.queryByTestId('GAME_GUIDE_CONTENT')).not.toBeInTheDocument();
         await user.click(gameGuideBtn);
-        expect(screen.queryByTestId('GAME_GUIDE_CONTENT')).toBeInTheDocument();
+        expect(screen.getByTestId('GAME_GUIDE_CONTENT')).toBeInTheDocument();
         await user.click(gameGuideBtn);
         expect(screen.queryByTestId('GAME_GUIDE_CONTENT')).not.toBeInTheDocument();
     })
