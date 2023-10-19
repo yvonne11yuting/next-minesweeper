@@ -10,14 +10,14 @@ const FlagModeBtn = ({
     setFlagMode
 }: FlagModeBtnProps) => {
     return (
-        <div className="mt-2 text-right block lg:hidden">
+        <div className="mt-2 block lg:hidden">
             <button
                 data-testid="FLAG_MODE_BTN"
                 onClick={() => setFlagMode(!flagMode)}
                 aria-pressed={flagMode}
-                className={`p-3 border-2 border-red-300 rounded ${flagMode ? 'bg-red-300' : ''}`}
+                className={`p-3 rounded-full ${flagMode ? 'bg-red-300' : 'bg-red-100'}`}
             >
-                <Flag color="#dc2626" size="1.75rem" />
+                <Flag color="#dc2626" size="1.5rem" />
             </button>
         </div>
     )

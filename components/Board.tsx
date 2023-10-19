@@ -6,13 +6,13 @@ import { GAME_LEVEL } from "@/constants/minesweeperConstants"
 import { domUtils } from "@/utils/domUtils"
 import GameInfo from "./GameInfo"
 import GameStatus from "./GameStatus"
-import FlagModeBtn from "./FlagModeBtn"
 
 interface BoardProps {
     level: GAME_LEVEL;
     rows: number;
     cols: number;
     totalMines: number;
+    flagMode: boolean;
 }
 
 const Board = ({
@@ -20,12 +20,12 @@ const Board = ({
     rows,
     cols,
     totalMines,
+    flagMode,
 }: BoardProps) => {
     const [mines, setMines] = useState<string[]>([])
     const [flagged, setFlagged] = useState<string[]>([])
     const [squareStatus, setSquareStatus] = useState<SquareStatus>({})
     const [gameStatus, setGameStatus] = useState<GameStatusEnum>(GameStatusEnum.INIT)
-    const [flagMode, setFlagMode] = useState<boolean>(false) // Flag mode only for mobile devices
     const mineSweeper = useMemo(() => new Minesweeper(rows, cols, mines, squareStatus), [rows, cols, mines, squareStatus])
     const board = mineSweeper.generateBoard
     const gameInProgress = gameStatus === GameStatusEnum.INIT || gameStatus === GameStatusEnum.PLAYING
@@ -147,7 +147,6 @@ const Board = ({
                     )
                 }
             </div>
-            <FlagModeBtn flagMode={flagMode} setFlagMode={setFlagMode} />
         </>
     )
 }
