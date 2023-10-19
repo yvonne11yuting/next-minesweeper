@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .h-full-screen {
+    height: 100vh;
+    /* fallback for Opera, IE and etc. */
+    height: 100dvh;
+  }
+}
+
 :root {
   --foreground-rgb: 10, 10 10;
   --background-start-rgb: 203, 213, 225;

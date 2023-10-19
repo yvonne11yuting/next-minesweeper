@@ -112,7 +112,7 @@ const Board = ({
                             const text = Number(squareStatus[squareId]) > 0 ? squareStatus[squareId] : ''
                             const hasFlag = flagged.includes(squareId)
                             const isGameOver = gameStatus === GameStatusEnum.LOSE
-                            const showMinds = isGameOver && mines.includes(squareId) && !hasFlag
+                            const showMines = isGameOver && mines.includes(squareId) && !hasFlag
                             const bgColor = squareStatus[squareId] && !hasFlag ? 'bg-lime-500' : 'bg-lime-300'
                             const wrongFlagStyles = isGameOver && text ? '-rotate-90 transition ease-out duration-1000' : ''
                             return (
@@ -121,13 +121,15 @@ const Board = ({
                                     data-testid={`SQUARE_${squareId}`}
                                     key={squareId}
                                     role="button"
-                                    className={`flex justify-center text-lg sm:text-xl items-center border border-lime-200 ${bgColor}`}
+                                    className={`flex justify-center text-lg sm:text-xl items-center text-slate-50 border border-lime-200 ${bgColor}`}
                                 >
                                     {
-                                        showMinds && (<Bomb color="#020617" />)
+                                        showMines && (<Bomb color="#020617" />)
                                     }
                                     {
-                                        text && !hasFlag && text
+                                        text && !hasFlag && (
+                                            <span>{text}</span>
+                                        )
                                     }
                                     {
                                         hasFlag && (
