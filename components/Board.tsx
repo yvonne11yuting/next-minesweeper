@@ -122,7 +122,6 @@ const Board = ({
                                     data-square={squareId}
                                     data-testid={`SQUARE_${squareId}`}
                                     key={squareId}
-                                    role="button"
                                     className={`flex justify-center text-lg sm:text-xl items-center text-slate-50 border border-lime-200 ${bgColor}`}
                                 >
                                     {

@@ -47,11 +47,11 @@ const GameInfo = ({
                 <Timer color="#f59e0b" />
                 <span>{recordTime}</span>
             </span>
-            <button onClick={resetGame}>
+            <button onClick={resetGame} aria-label="restart game">
                 <RotateCcw color="#a855f7" />
             </button>
             <div className="relative">
-                <button data-testid="GAME_GUIDE_BTN" onClick={() => setShowGuide(!showGuide)}>
+                <button data-testid="GAME_GUIDE_BTN" onClick={() => setShowGuide(!showGuide)} aria-label="how to play">
                     <Info className="text-slate-400" />
                 </button>
                 {
