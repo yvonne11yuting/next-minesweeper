@@ -1,7 +1,9 @@
 "use client"
 import { useState } from 'react'
-import Board from './Board'
+
 import { GAME_LEVEL, LEVEL_OPTIONS, LEVEL_SETTING } from '@/constants/minesweeperConstants'
+
+import Board from './Board'
 import FlagModeBtn from './FlagModeBtn'
 
 const MinesweeperMain = () => {

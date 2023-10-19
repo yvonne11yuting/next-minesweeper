@@ -1,7 +1,9 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { Minesweeper } from '@/utils/minesweeperUtils'
+
 import { domUtils } from '@/utils/domUtils'
+import { Minesweeper } from '@/utils/minesweeperUtils'
+
 import MinesweeperMain from '../MinesweeperMain'
 
 /* Test cases
