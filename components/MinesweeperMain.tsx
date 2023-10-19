@@ -1,16 +1,16 @@
 "use client"
-import { useState } from 'react';
-import Board from './Board';
-import { LEVEL_OPTIONS, LEVEL_SETTING } from '@/constants/minesweeperCostants';
+import { useState } from 'react'
+import Board from './Board'
+import { LEVEL_OPTIONS, LEVEL_SETTING } from '@/constants/minesweeperCostants'
 
 const MinesweeperMain = () => {
-    const defaultLevelEasy = LEVEL_OPTIONS[0].value;
-    const [level, setLevel] = useState<string>(defaultLevelEasy);
-    const selectedLevel = LEVEL_SETTING[level];
+    const defaultLevelEasy = LEVEL_OPTIONS[0].value
+    const [level, setLevel] = useState<string>(defaultLevelEasy)
+    const selectedLevel = LEVEL_SETTING[level]
 
     const onChangeLevel = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setLevel(e.target.value);
-    };
+        setLevel(e.target.value)
+    }
 
     return (
         <div className="p-2">
