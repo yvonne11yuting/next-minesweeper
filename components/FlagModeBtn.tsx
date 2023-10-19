@@ -14,6 +14,7 @@ const FlagModeBtn = ({
             <button
                 data-testid="FLAG_MODE_BTN"
                 onClick={() => setFlagMode(!flagMode)}
+                aria-pressed={flagMode}
                 className={`p-3 border-2 border-red-300 rounded ${flagMode ? 'bg-red-300' : ''}`}
             >
                 <Flag color="#dc2626" size="1.75rem" />

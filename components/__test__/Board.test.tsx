@@ -3,11 +3,13 @@ import userEvent from '@testing-library/user-event';
 import { Minesweeper } from '@/utils/minesweeperUtils';
 import { domUtils } from '@/utils/domUtils';
 import Board from '../Board';
+import FlagModeBtn from '../FlagModeBtn';
 
 /* Test cases
     1. should render board with correct number of square elements
     2. clicking on a square triggers the clickSquare/flagSquare function correctly
     3. should show the game status after winning the game
+    4. should flag a square when flag mode is on
 **/
 
 describe('Board', () => {
@@ -96,6 +98,22 @@ describe('Board', () => {
         await user.click(gameBoard);
         expect(screen.getByTestId('GAME_RESULT')).toHaveTextContent('You Win! 🥳');
 
+    })
+
+    it('should flag a square when flag mode is on', async () => {
+        generateMockMines(['0-1', '2-3', '3-2', '4-0', '4-1']);
+        render(<Board {...props} />);
+
+        const gameBoard = screen.getByTestId('GAME_BOARD');
+        const flagModeBtn = screen.getByTestId('FLAG_MODE_BTN');
+
+        expect(screen.queryByTestId('FLAG_0-0')).not.toBeInTheDocument();
+        setMockSquareIds(['0-2', '0-0', '0-0']);
+        await user.click(gameBoard);
+        await user.click(flagModeBtn);
+        await user.click(gameBoard);
+        expect(screen.getByTestId('FLAG_0-0')).toBeInTheDocument();
+        expect(screen.getByTestId('SQUARE_0-0')).toHaveTextContent('');
     })
 
     function setMockSquareIds(mockSquareIds: string | string[]) {
