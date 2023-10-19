@@ -1,6 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+
 import { GameStatusEnum } from '@/utils/minesweeperUtils'
+
 import GameStatus from '../GameStatus'
 
 describe('GameStatus', () => {

@@ -1,9 +1,11 @@
 "use client"
-import { useCallback, useEffect, useMemo, useState } from "react"
 import { Bomb, Flag } from "lucide-react"
-import { SquareStatus, GameStatusEnum, Minesweeper } from "@/utils/minesweeperUtils"
+import { useCallback, useEffect, useMemo, useState } from "react"
+
 import { GAME_LEVEL } from "@/constants/minesweeperConstants"
 import { domUtils } from "@/utils/domUtils"
+import { GameStatusEnum, Minesweeper,SquareStatus } from "@/utils/minesweeperUtils"
+
 import GameInfo from "./GameInfo"
 import GameStatus from "./GameStatus"
 
@@ -120,7 +122,6 @@ const Board = ({
                                     data-square={squareId}
                                     data-testid={`SQUARE_${squareId}`}
                                     key={squareId}
-                                    role="button"
                                     className={`flex justify-center text-lg sm:text-xl items-center text-slate-50 border border-lime-200 ${bgColor}`}
                                 >
                                     {

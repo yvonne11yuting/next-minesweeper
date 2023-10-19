@@ -1,7 +1,9 @@
 "use client"
 import { useState } from 'react'
-import Board from './Board'
+
 import { GAME_LEVEL, LEVEL_OPTIONS, LEVEL_SETTING } from '@/constants/minesweeperConstants'
+
+import Board from './Board'
 import FlagModeBtn from './FlagModeBtn'
 
 const MinesweeperMain = () => {
@@ -17,10 +19,10 @@ const MinesweeperMain = () => {
     return (
         <div className="p-2">
             <div className="flex items-center justify-between mb-4">
-                <select className="flex-none px-2 py-1 text-base text-slate-800 rounded" value={level} onChange={onChangeLevel}>
+                <select className="flex-none px-2 py-1 text-base text-slate-800 rounded" value={level} onChange={onChangeLevel} aria-label="level">
                     {
                         LEVEL_OPTIONS.map(({ value, text }) => (
-                            <option key={value} value={value}>{text}</option>
+                            <option key={value} value={value} aria-selected={level === value}>{text}</option>
                         ))
                     }
                 </select>
