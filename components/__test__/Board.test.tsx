@@ -10,6 +10,7 @@ import FlagModeBtn from '../FlagModeBtn';
     2. clicking on a square triggers the clickSquare/flagSquare function correctly
     3. should show the game status after winning the game
     4. should flag a square when flag mode is on
+    5. should show `how to play` when clicking on the game guide button
 **/
 
 describe('Board', () => {
@@ -114,6 +115,17 @@ describe('Board', () => {
         await user.click(gameBoard);
         expect(screen.getByTestId('FLAG_0-0')).toBeInTheDocument();
         expect(screen.getByTestId('SQUARE_0-0')).toHaveTextContent('');
+    })
+
+    it('should show `how to play` when clicking on the game guide button', async () => {
+        render(<Board {...props} />);
+
+        const gameGuideBtn = screen.getByTestId('GAME_GUIDE_BTN');
+        expect(screen.queryByTestId('GAME_GUIDE_CONTENT')).not.toBeInTheDocument();
+        await user.click(gameGuideBtn);
+        expect(screen.queryByTestId('GAME_GUIDE_CONTENT')).toBeInTheDocument();
+        await user.click(gameGuideBtn);
+        expect(screen.queryByTestId('GAME_GUIDE_CONTENT')).not.toBeInTheDocument();
     })
 
     function setMockSquareIds(mockSquareIds: string | string[]) {
