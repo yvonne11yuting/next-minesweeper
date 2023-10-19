@@ -1,19 +1,23 @@
-export const LEVEL_OPTIONS = [
-    { value: 'EASY', text: 'easy' },
-    { value: 'MEDIUM', text: 'medium' },
-    { value: 'HARD', text: 'hard' },
-];
+type LevelSetting = {
+    rows: number;
+    cols: number;
+    totalMines: number;
+}
 
-export const LEVEL_SETTING: {
-    [key: string]: {
-        rows: number;
-        cols: number;
-        totalMines: number;
-    }
-} = {
-    EASY: { rows: 9, cols: 9, totalMines: 10 },
-    MEDIUM: { rows: 12, cols: 10, totalMines: 25 },
-    HARD: { rows: 15, cols: 12, totalMines: 40 },
+export enum GAME_LEVEL {
+    EASY, MEDIUM, HARD
+}
+
+export const LEVEL_OPTIONS = [
+    { value: GAME_LEVEL.EASY, text: 'easy' },
+    { value: GAME_LEVEL.MEDIUM, text: 'medium' },
+    { value: GAME_LEVEL.HARD, text: 'hard' },
+]
+
+export const LEVEL_SETTING: Record<GAME_LEVEL, LevelSetting> = {
+    [GAME_LEVEL.EASY]: { rows: 9, cols: 9, totalMines: 10 },
+    [GAME_LEVEL.MEDIUM]: { rows: 12, cols: 10, totalMines: 25 },
+    [GAME_LEVEL.HARD]: { rows: 15, cols: 12, totalMines: 40 },
 }
 
 export const GAME_CONTROL_TEXT = [{
@@ -31,4 +35,4 @@ export const GAME_CONTROL_TEXT = [{
 }, {
     text: 'There\'s a timer to record how quickly you complete the game.',
     icon: 'timer'
-}];
+}]
