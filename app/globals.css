@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .h-full-screen {
+    height: 100vh;
+    /* fallback for Opera, IE and etc. */
+    height: 100dvh;
+  }
+}
+
 :root {
   --foreground-rgb: 10, 10 10;
   --background-start-rgb: 203, 213, 225;
@@ -22,6 +30,18 @@ body {
   background: linear-gradient(to bottom,
       transparent,
       rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
+}
+
+select {
+  /* for Firefox */
+  -moz-appearance: none;
+  /* for Chrome */
+  -webkit-appearance: none;
+}
+
+/* For IE10 */
+select::-ms-expand {
+  display: none;
 }
 
 .title-shadow {

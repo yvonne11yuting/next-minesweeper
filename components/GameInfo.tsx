@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from "react"
 import { Flag, Info, Mouse, RotateCcw, Timer } from "lucide-react"
-import { GAME_CONTROL_TEXT } from "@/constants/minesweeperCostants";
+import { GAME_CONTROL_TEXT } from "@/constants/minesweeperConstants"
 
 interface GameInfoProps {
     remainingFlags: number;
@@ -15,26 +15,26 @@ const GameInfo = ({
     pauseTimer,
     resetGame
 }: GameInfoProps) => {
-    const [recordTime, setRecordTime] = useState<number>(0);
-    const [showGuide, setShowGuide] = useState<boolean>(false);
+    const [recordTime, setRecordTime] = useState<number>(0)
+    const [showGuide, setShowGuide] = useState<boolean>(false)
 
     useEffect(() => {
-        let timer: number | undefined;
+        let timer: number | undefined
         if (startTimer) {
             timer = window.setInterval(() => {
                 if (!pauseTimer) {
-                    setRecordTime(prev => prev + 1);
+                    setRecordTime(prev => prev + 1)
                 }
-            }, 1000);
+            }, 1000)
         }
         if (!startTimer && !pauseTimer) { // reset timer
-            setRecordTime(0);
-            window.clearInterval(timer);
+            setRecordTime(0)
+            window.clearInterval(timer)
         }
         return () => {
-            window.clearInterval(timer);
+            window.clearInterval(timer)
         }
-    }, [startTimer, pauseTimer, recordTime]);
+    }, [startTimer, pauseTimer, recordTime])
 
     return (
         <div className="flex justify-between items-baseline pb-1">

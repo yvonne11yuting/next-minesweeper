@@ -1,4 +1,4 @@
-import { GameStatusEnum } from "@/utils/minesweeperUtils";
+import { GameStatusEnum } from "@/utils/minesweeperUtils"
 
 interface GameStatusProps {
     status: GameStatusEnum;
