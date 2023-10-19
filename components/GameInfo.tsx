@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { Flag, Info, Mouse, RotateCcw, Timer } from "lucide-react"
-import { GAME_CONTROL_TEXT } from "@/constants/minesweeperCostants"
+import { GAME_CONTROL_TEXT } from "@/constants/minesweeperConstants"
 
 interface GameInfoProps {
     remainingFlags: number;

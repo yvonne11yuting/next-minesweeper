@@ -1,15 +1,15 @@
 "use client"
 import { useState } from 'react'
 import Board from './Board'
-import { LEVEL_OPTIONS, LEVEL_SETTING } from '@/constants/minesweeperCostants'
+import { GAME_LEVEL, LEVEL_OPTIONS, LEVEL_SETTING } from '@/constants/minesweeperConstants'
 
 const MinesweeperMain = () => {
     const defaultLevelEasy = LEVEL_OPTIONS[0].value
-    const [level, setLevel] = useState<string>(defaultLevelEasy)
+    const [level, setLevel] = useState<GAME_LEVEL>(defaultLevelEasy)
     const selectedLevel = LEVEL_SETTING[level]
 
     const onChangeLevel = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setLevel(e.target.value)
+        setLevel(e.target.value as unknown as GAME_LEVEL)
     }
 
     return (
@@ -24,6 +24,7 @@ const MinesweeperMain = () => {
                 </select>
             </div>
             <Board
+                level={level}
                 rows={selectedLevel.rows}
                 cols={selectedLevel.cols}
                 totalMines={selectedLevel.totalMines}

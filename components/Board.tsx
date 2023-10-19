@@ -1,19 +1,22 @@
 "use client"
-import { useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { Bomb, Flag } from "lucide-react"
 import { SquareStatus, GameStatusEnum, Minesweeper } from "@/utils/minesweeperUtils"
+import { GAME_LEVEL } from "@/constants/minesweeperConstants"
 import { domUtils } from "@/utils/domUtils"
 import GameInfo from "./GameInfo"
 import GameStatus from "./GameStatus"
 import FlagModeBtn from "./FlagModeBtn"
 
 interface BoardProps {
+    level: GAME_LEVEL;
     rows: number;
     cols: number;
     totalMines: number;
 }
 
 const Board = ({
+    level,
     rows,
     cols,
     totalMines,
@@ -26,6 +29,17 @@ const Board = ({
     const mineSweeper = useMemo(() => new Minesweeper(rows, cols, mines, squareStatus), [rows, cols, mines, squareStatus])
     const board = mineSweeper.generateBoard
     const gameInProgress = gameStatus === GameStatusEnum.INIT || gameStatus === GameStatusEnum.PLAYING
+    const resetGame = useCallback(() => {
+        mineSweeper.resetGame()
+        setMines([])
+        setFlagged([])
+        setSquareStatus({})
+        setGameStatus(GameStatusEnum.INIT)
+    }, [])
+
+    useEffect(() => {
+        resetGame()
+    }, [level, resetGame])
 
     const clickSquare = (e: React.MouseEvent<HTMLDivElement>) => {
         const squareId = domUtils.getDataSquare(e)
@@ -78,14 +92,6 @@ const Board = ({
                 setGameStatus(GameStatusEnum.WIN)
             }
         }
-    }
-
-    const resetGame = () => {
-        mineSweeper.resetGame()
-        setMines([])
-        setFlagged([])
-        setSquareStatus({})
-        setGameStatus(GameStatusEnum.INIT)
     }
 
     return (
