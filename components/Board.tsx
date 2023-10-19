@@ -97,9 +97,9 @@ const Board = ({
                 resetGame={resetGame}
             />
             <div className="relative">
-                <div data-testid="GAME_BOARD" className="grid w-80 sm:w-[500px] h-80 sm:h-[500px] cursor-default" style={{
-                    gridTemplateRows: `repeat(${rows}, 1fr)`,
-                    gridTemplateColumns: `repeat(${cols}, 1fr)`
+                <div data-testid="GAME_BOARD" className="grid sm:w-full h-full cursor-default" style={{
+                    gridTemplateRows: `repeat(${rows}, minmax(24px, 36px))`,
+                    gridTemplateColumns: `repeat(${cols}, minmax(24px, 36px))`
                 }} onClick={clickSquare} onContextMenu={flagSquare}>
                     {
                         board.map((squareId) => {
