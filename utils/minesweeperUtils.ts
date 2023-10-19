@@ -92,7 +92,7 @@ export class Minesweeper {
         if (adjacentFlags.length === Number(this.squareStatus[squareId])) {
             for (let targetSquare of adjacentSquares) {
                 // by pass if square is flagged and is a mine
-                if (adjacentFlags.includes(targetSquare) && this.mines.includes(targetSquare)) continue;
+                if (flagged.includes(targetSquare) && this.mines.includes(targetSquare)) continue;
                 this.checkSquare(targetSquare);
             }
         }

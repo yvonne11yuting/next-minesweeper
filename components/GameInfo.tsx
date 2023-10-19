@@ -51,11 +51,11 @@ const GameInfo = ({
             </button>
             <div className="relative">
                 <button onClick={() => setShowGuide(!showGuide)}>
-                    <Info className="text-slate-200" />
+                    <Info className="text-slate-400" />
                 </button>
                 {
                     showGuide && (
-                        <div className="absolute left-0 bottom-0 w-96 p-5 ml-6 bg-slate-100 text-slate-900 -translate-x-full translate-y-full z-10 rounded bg-opacity-80">
+                        <div className="absolute left-0 bottom-0 w-80 p-5 ml-6 bg-slate-100 text-slate-900 -translate-x-full translate-y-full z-10 rounded bg-opacity-80">
                             <h2 className="text-xl font-semibold text-lime-800">How To Play</h2>
                             <ul className="flex flex-col gap-2 mt-4 leading-6 text-base text-slate-700">
                                 {

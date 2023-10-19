@@ -5,6 +5,7 @@ import { SquareStatus, GameStatusEnum, Minesweeper } from "@/utils/minesweeperUt
 import { domUtils } from "@/utils/domUtils";
 import GameInfo from "./GameInfo";
 import GameStatus from "./GameStatus";
+import FlagModeBtn from "./FlagModeBtn";
 
 interface BoardProps {
     rows: number;
@@ -21,6 +22,7 @@ const Board = ({
     const [flagged, setFlagged] = useState<string[]>([]);
     const [squareStatus, setSquareStatus] = useState<SquareStatus>({});
     const [gameStatus, setGameStatus] = useState<GameStatusEnum>(GameStatusEnum.INIT);
+    const [flagMode, setFlagMode] = useState<boolean>(false); // Flag mode only for mobile devices
     const mineSweeper = useMemo(() => new Minesweeper(rows, cols, mines, squareStatus), [rows, cols, mines, squareStatus])
     const board = mineSweeper.generateBoard;
     const gameInProgress = gameStatus === GameStatusEnum.INIT || gameStatus === GameStatusEnum.PLAYING;
@@ -33,6 +35,10 @@ const Board = ({
         const isFlagged = flagged.includes(squareId);
         const numberedSquare = squareStatus[squareId] && squareStatus[squareId] !== '0';
 
+        if (minesInitialized && flagMode) {
+            flagSquare(e);
+            return;
+        }
         if (!squareId || isFlagged) return;
 
         if (minesInitialized) {
@@ -58,7 +64,7 @@ const Board = ({
         if (squareStatus[squareId]) return;
         if (flagged.includes(squareId)) {
             setFlagged(flagged.filter(id => id !== squareId));
-        } else {
+        } else if (flagged.length < totalMines) {
             setFlagged([...flagged, squareId]);
         }
     }
@@ -99,9 +105,10 @@ const Board = ({
                         board.map((squareId) => {
                             const text = Number(squareStatus[squareId]) > 0 ? squareStatus[squareId] : '';
                             const hasFlag = flagged.includes(squareId);
-                            const isGameOver = gameStatus === GameStatusEnum.LOSE && mines.includes(squareId) && !hasFlag;
+                            const isGameOver = gameStatus === GameStatusEnum.LOSE;
+                            const showMinds = isGameOver && mines.includes(squareId) && !hasFlag;
                             const bgColor = squareStatus[squareId] && !hasFlag ? 'bg-lime-500' : 'bg-lime-300'
-                            const wrongFlagStyles = '-rotate-90 transition ease-out duration-1000';
+                            const wrongFlagStyles = isGameOver && text ? '-rotate-90 transition ease-out duration-1000' : '';
                             return (
                                 <div
                                     data-square={squareId}
@@ -111,14 +118,14 @@ const Board = ({
                                     className={`flex justify-center text-lg sm:text-xl items-center border border-lime-200 ${bgColor}`}
                                 >
                                     {
-                                        isGameOver && (<Bomb color="#020617" />)
+                                        showMinds && (<Bomb color="#020617" />)
                                     }
                                     {
                                         text && !hasFlag && text
                                     }
                                     {
                                         hasFlag && (
-                                            <Flag data-testid={`FLAG_${squareId}`} className={`${text ? wrongFlagStyles : ''}`} color="#dc2626" />
+                                            <Flag data-testid={`FLAG_${squareId}`} className={`${wrongFlagStyles}`} color="#dc2626" />
                                         )
                                     }
                                 </div>
@@ -134,6 +141,7 @@ const Board = ({
                     )
                 }
             </div>
+            <FlagModeBtn flagMode={flagMode} setFlagMode={setFlagMode} />
         </>
     )
 }
