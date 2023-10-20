@@ -115,7 +115,8 @@ const Board = ({
                             const hasFlag = flagged.includes(squareId)
                             const isGameOver = gameStatus === GameStatusEnum.LOSE
                             const showMines = isGameOver && mines.includes(squareId) && !hasFlag
-                            const bgColor = squareStatus[squareId] && !hasFlag ? 'bg-lime-500' : 'bg-lime-300'
+                            const isChecked = squareStatus[squareId]
+                            const bgColor = isChecked && !hasFlag ? 'bg-lime-500' : 'bg-lime-300'
                             const wrongFlagStyles = isGameOver && text ? '-rotate-90 transition ease-out duration-1000' : ''
                             return (
                                 <div
@@ -134,7 +135,18 @@ const Board = ({
                                     }
                                     {
                                         hasFlag && (
-                                            <Flag data-testid={`FLAG_${squareId}`} className={`${wrongFlagStyles}`} color="#dc2626" />
+                                            <Flag
+                                                data-testid={`FLAG_${squareId}`}
+                                                className={wrongFlagStyles} color="#dc2626"
+                                            />
+                                        )
+                                    }
+                                    {
+                                        flagMode && !isChecked && !hasFlag && (
+                                            <Flag
+                                                data-testid={`FLAG_HINT_${squareId}`}
+                                                className="stroke-red-50 opacity-50"
+                                            />
                                         )
                                     }
                                 </div>

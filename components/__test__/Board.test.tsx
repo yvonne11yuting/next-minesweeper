@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
+import { GAME_LEVEL } from '@/constants/minesweeperConstants'
 import { domUtils } from '@/utils/domUtils'
 import { Minesweeper } from '@/utils/minesweeperUtils'
 
@@ -11,6 +12,7 @@ import Board from '../Board'
     2. clicking on a square triggers the clickSquare/flagSquare function correctly
     3. should show the game status after winning the game
     4. should show `how to play` when clicking on the game guide button
+    5. should hint to users it's the flag mode when clicking on the flag mode button
 **/
 
 describe('Board', () => {
@@ -18,9 +20,11 @@ describe('Board', () => {
     const mockGenerateMine = jest.spyOn(Minesweeper.prototype, 'generateMine')
     const user = userEvent.setup()
     const props = {
+        level: GAME_LEVEL.EASY,
         rows: 5,
         cols: 5,
-        totalMines: 5
+        totalMines: 5,
+        flagMode: false,
     }
 
     beforeEach(() => {
@@ -110,6 +114,17 @@ describe('Board', () => {
         expect(screen.getByTestId('GAME_GUIDE_CONTENT')).toBeInTheDocument()
         await user.click(gameGuideBtn)
         expect(screen.queryByTestId('GAME_GUIDE_CONTENT')).not.toBeInTheDocument()
+    })
+
+    it('should hint to users it\'s the flag mode when clicking on the flag mode button', async () => {
+        const flagTrueProps = { ...props, flagMode: true }
+        const minesweeper = new Minesweeper(props.rows, props.cols, [], {})
+
+        render(<Board {...flagTrueProps} />)
+        for (let square of minesweeper.generateBoard) {
+            const flagHint = screen.getByTestId(`FLAG_HINT_${square}`)
+            expect(flagHint).toBeInTheDocument()
+        }
     })
 
     function setMockSquareIds(mockSquareIds: string | string[]) {
