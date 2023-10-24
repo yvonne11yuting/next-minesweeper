@@ -121,7 +121,7 @@ describe('Board', () => {
         const minesweeper = new Minesweeper(props.rows, props.cols, [], {})
 
         render(<Board {...flagTrueProps} />)
-        for (let square of minesweeper.generateBoard) {
+        for (let square of minesweeper.generateBoard(props.rows, props.cols)) {
             const flagHint = screen.getByTestId(`FLAG_HINT_${square}`)
             expect(flagHint).toBeInTheDocument()
         }

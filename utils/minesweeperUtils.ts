@@ -17,20 +17,10 @@ export class Minesweeper {
     gameStatus: GameStatusEnum = GameStatusEnum.INIT
 
     constructor(rows: number, cols: number, mines: string[], squareStatus: { [key: string]: string }) {;
-        this.rows = rows;
-        this.cols = cols;
-        this.mines = mines;
-        this.squareStatus = squareStatus;
-    }
-
-    generateBoard(rows: number, cols: number): string[] {
-        let board: string[] = [];
-        for (let r = 0; r < rows; r++) {
-            for (let c = 0; c < cols; c++) {
-                board.push(`${r}-${c}`);
-            }
-        }
-        return board
+        this.rows = rows
+        this.cols = cols
+        this.mines = mines
+        this.squareStatus = squareStatus
     }
 
     private getAdjacentSquares(row: number, col: number): string[] {
@@ -50,6 +40,16 @@ export class Minesweeper {
         const row = Math.floor(Math.random() * this.rows)
         const col = Math.floor(Math.random() * this.cols)
         return `${row}-${col}`
+    }
+
+    generateBoard(rows: number, cols: number): string[] {
+        let board: string[] = []
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                board.push(`${r}-${c}`)
+            }
+        }
+        return board
     }
 
     initMines(firstPosition: string, totalMines: number) {
@@ -98,9 +98,9 @@ export class Minesweeper {
     }
 
     checkGameWin = () => {
-        const totalOpened = Object.keys(this.squareStatus).length;
+        const totalOpened = Object.keys(this.squareStatus).length
         if (totalOpened + this.mines.length === this.rows * this.cols) {
-            this.gameStatus = GameStatusEnum.WIN;
+            this.gameStatus = GameStatusEnum.WIN
         }
     }
 

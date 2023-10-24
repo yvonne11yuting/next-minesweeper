@@ -25,7 +25,7 @@ describe('Minesweeper', () => {
     })
 
     it('should generate the board correctly', () => {
-        const board = minesweeper.generateBoard(5, 5);
+        const board = minesweeper.generateBoard(5, 5)
 
         expect(board.length).toBe(25)
         expect(board).toContain('0-0')
@@ -84,17 +84,17 @@ describe('Minesweeper', () => {
     })
 
     it('should check game win correctly', () => {
-        expect(minesweeper.gameStatus).toBe(GameStatusEnum.INIT);
+        expect(minesweeper.gameStatus).toBe(GameStatusEnum.INIT)
 
-        minesweeper.mines = ['0-0', '1-1', '2-2'];
+        minesweeper.mines = ['0-0', '1-1', '2-2']
         minesweeper.generateBoard(5, 5).forEach(key => {
             if (!minesweeper.mines.includes(key)) {
                 minesweeper.squareStatus[key] = '1'
             }
-        });
-        minesweeper.checkGameWin();
-        expect(minesweeper.gameStatus).toBe(GameStatusEnum.WIN);
-    });
+        })
+        minesweeper.checkGameWin()
+        expect(minesweeper.gameStatus).toBe(GameStatusEnum.WIN)
+    })
 
     it('should reset the game correctly', () => {
         generateMockMines(['0-0', '1-1', '2-2', '3-3'])
