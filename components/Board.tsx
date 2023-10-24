@@ -1,11 +1,11 @@
 "use client"
 import { Bomb, Flag } from "lucide-react"
-import { use, useCallback, useEffect, useMemo, useReducer, useState } from "react"
+import { useEffect, useMemo } from "react"
 
 import { GAME_LEVEL } from "@/constants/minesweeperConstants"
 import useMinesweeper from "@/hooks/useMinesweeper"
 import { domUtils } from "@/utils/domUtils"
-import { GameStatusEnum, Minesweeper,SquareStatus } from "@/utils/minesweeperUtils"
+import { GameStatusEnum, Minesweeper } from "@/utils/minesweeperUtils"
 
 import GameInfo from "./GameInfo"
 import GameStatus from "./GameStatus"

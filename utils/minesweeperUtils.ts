@@ -16,7 +16,7 @@ export class Minesweeper {
     mines: string[]
     gameStatus: GameStatusEnum = GameStatusEnum.INIT
 
-    constructor(rows: number, cols: number, mines: string[], squareStatus: { [key: string]: string }) {;
+    constructor(rows: number, cols: number, mines: string[], squareStatus: { [key: string]: string }) {
         this.rows = rows
         this.cols = cols
         this.mines = mines
