@@ -1,10 +1,11 @@
 "use client"
 import { Bomb, Flag } from "lucide-react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo } from "react"
 
 import { GAME_LEVEL } from "@/constants/minesweeperConstants"
+import useMinesweeper from "@/hooks/useMinesweeper"
 import { domUtils } from "@/utils/domUtils"
-import { GameStatusEnum, Minesweeper,SquareStatus } from "@/utils/minesweeperUtils"
+import { GameStatusEnum, Minesweeper } from "@/utils/minesweeperUtils"
 
 import GameInfo from "./GameInfo"
 import GameStatus from "./GameStatus"
@@ -24,24 +25,26 @@ const Board = ({
     totalMines,
     flagMode,
 }: BoardProps) => {
-    const [mines, setMines] = useState<string[]>([])
-    const [flagged, setFlagged] = useState<string[]>([])
-    const [squareStatus, setSquareStatus] = useState<SquareStatus>({})
-    const [gameStatus, setGameStatus] = useState<GameStatusEnum>(GameStatusEnum.INIT)
-    const mineSweeper = useMemo(() => new Minesweeper(rows, cols, mines, squareStatus), [rows, cols, mines, squareStatus])
-    const board = mineSweeper.generateBoard
+    const minesweeper = useMemo(() => new Minesweeper(rows, cols, [], {}), [rows, cols]) as Minesweeper
+    const [{
+        board,
+        mines,
+        flagged,
+        squareStatus,
+        gameStatus,
+    }, {
+        checkAdjacentSquares,
+        checkSquare,
+        initMines,
+        resetGame,
+        setFlagged
+        }] = useMinesweeper({ minesweeper })
     const gameInProgress = gameStatus === GameStatusEnum.INIT || gameStatus === GameStatusEnum.PLAYING
-    const resetGame = useCallback(() => {
-        mineSweeper.resetGame()
-        setMines([])
-        setFlagged([])
-        setSquareStatus({})
-        setGameStatus(GameStatusEnum.INIT)
-    }, [])
+
 
     useEffect(() => {
-        resetGame()
-    }, [level, resetGame])
+        resetGame({ rows, cols })
+    }, [level])
 
     const clickSquare = (e: React.MouseEvent<HTMLDivElement>) => {
         const squareId = domUtils.getDataSquare(e)
@@ -59,19 +62,15 @@ const Board = ({
 
         if (minesInitialized) {
             if (isDoubleClick && numberedSquare) {
-                mineSweeper.checkAdjacentSquares(squareId, flagged)
+                checkAdjacentSquares(squareId, flagged)
             }
             if (isSingleClick) {
-                mineSweeper.checkSquare(squareId)
+                checkSquare(squareId)
             }
         } else {
-            mineSweeper.initMines(squareId, totalMines)
-            mineSweeper.checkSquare(squareId)
-            setMines(mineSweeper.mines)
-            setGameStatus(GameStatusEnum.PLAYING)
+            initMines(squareId, totalMines)
+            checkSquare(squareId)
         }
-        setSquareStatus({ ...squareStatus, ...mineSweeper.squareStatus })
-        checkGameStatus()
     }
 
     const flagSquare = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -79,20 +78,9 @@ const Board = ({
         const squareId = domUtils.getDataSquare(e)
         if (squareStatus[squareId]) return
         if (flagged.includes(squareId)) {
-            setFlagged(flagged.filter(id => id !== squareId))
+            setFlagged(flagged.filter((id: string) => id !== squareId))
         } else if (flagged.length < totalMines) {
             setFlagged([...flagged, squareId])
-        }
-    }
-
-    const checkGameStatus = () => {
-        if (mineSweeper.gameStatus === GameStatusEnum.LOSE) {
-            setGameStatus(GameStatusEnum.LOSE)
-        } else {
-            const gameWin = mineSweeper.checkGameWin()
-            if (gameWin) {
-                setGameStatus(GameStatusEnum.WIN)
-            }
         }
     }
 
@@ -110,7 +98,7 @@ const Board = ({
                     gridTemplateColumns: `repeat(${cols}, minmax(24px, 36px))`
                 }} onClick={clickSquare} onContextMenu={flagSquare}>
                     {
-                        board.map((squareId) => {
+                        board.map((squareId: string) => {
                             const text = Number(squareStatus[squareId]) > 0 ? squareStatus[squareId] : ''
                             const hasFlag = flagged.includes(squareId)
                             const isGameOver = gameStatus === GameStatusEnum.LOSE
@@ -157,7 +145,7 @@ const Board = ({
                 {
                     !gameInProgress && (
                         <div className="absolute top-0 left-0 flex items-center justify-center w-full h-full">
-                            <GameStatus status={gameStatus} resetGame={resetGame} />
+                            <GameStatus status={gameStatus} resetGame={() => resetGame({ rows, cols })} />
                         </div>
                     )
                 }
